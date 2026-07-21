@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS_v5_4</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--soft:#eaf1ff;--shadow:0 12px 30px rgba(15,23,42,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif}
+body{overflow-x:hidden}
+.pages{width:100%;min-height:100vh}
+.page{display:none;width:100%;min-height:100vh;padding:18px 16px 78px}
+.page.active{display:block}
+.inner{max-width:760px;margin:0 auto}.header{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 14px}
+.brand{font-size:22px;font-weight:900;letter-spacing:-.5px}.badge{font-size:12px;color:var(--blue);background:var(--soft);padding:7px 10px;border-radius:999px;font-weight:800}
+.header-actions{display:flex;align-items:center;gap:8px}.showcase-toggle{display:inline-flex;align-items:center;gap:2px;border:1px solid #dbe3ee;border-radius:999px;background:#fff;padding:3px;font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 6px 16px rgba(15,23,42,.06)}.showcase-option{padding:5px 7px;border-radius:999px;color:#9ca3af;white-space:nowrap;transition:.15s}.showcase-divider{color:#d1d5db;font-weight:700}.showcase-toggle.active .showcase-private,.showcase-toggle:not(.active) .showcase-public{background:#111827;color:#fff}.nav-page.showcase-disabled{opacity:.45}.showcase-mode .total{border:1px solid #dbeafe}.showcase-mode .home-sync{display:none}
+.card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}.total{text-align:center;padding:26px 18px 24px}
+.label{color:var(--muted);font-size:14px;font-weight:800}.krw{font-size:34px;font-weight:900;letter-spacing:-1.2px;margin-top:8px}.usd{color:var(--muted);font-size:18px;font-weight:800;margin-top:6px}.home-sync{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;padding:7px 10px;border-radius:999px;background:#f0fdf4;color:#166534;font-size:11px;font-weight:900}.home-sync.loading{background:#fffbeb;color:#92400e}.home-sync.error{background:#fff7f7;color:#b91c1c}
+.chart-wrap{width:100%;max-width:390px;margin:10px auto 0;position:relative}.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-48%);text-align:center;pointer-events:none}.center .mini{font-size:12px;color:var(--muted);font-weight:800}.center .main{font-size:20px;font-weight:900;margin-top:2px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.legend-item{border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer;background:#fff;transition:.15s}.legend-item:active{transform:scale(.98)}.legend-item.selected{border-color:#93c5fd;background:#f8fbff;box-shadow:0 8px 18px rgba(37,99,235,.08)}
+.legend-top{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}.legend-money{color:var(--muted);font-size:12px;margin-top:6px;font-weight:800}
+.asset-info{margin-top:14px;border:1px solid var(--line);border-radius:18px;background:#fbfdff;padding:14px}.asset-info-title{font-weight:900}.asset-info-sub{color:var(--muted);font-size:13px;font-weight:800;margin-top:5px}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin-top:14px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 12px}
+.tab{border:0;border-radius:14px;padding:11px 6px;background:#eef2f7;color:#374151;font-weight:900}.tab.active{background:var(--blue);color:white}
+.title-row h2{margin:0;font-size:22px}.sub{margin-top:4px;font-size:13px;color:var(--muted)}.canvas-box{height:390px;position:relative}#historyChart{width:100%!important;height:100%!important}
+.info{border:1px solid var(--line);background:#fbfdff;border-radius:18px;padding:14px;margin-top:12px}.info-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.navbtn{border:0;background:#eef2f7;border-radius:12px;width:42px;height:42px;font-size:22px;font-weight:900;color:#374151}.navbtn:active{transform:scale(.96)}
+.info-body{text-align:center;flex:1}.info-date{color:var(--muted);font-size:13px;font-weight:900}.info-main{font-size:21px;font-weight:900;margin-top:6px}.info-sub{color:var(--muted);font-size:14px;font-weight:900;margin-top:3px}.info-extra{font-size:12px;color:#2563eb;font-weight:900;margin-top:5px}
+.bottom-nav{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:6px;background:rgba(255,255,255,.94);border:1px solid rgba(229,231,235,.95);box-shadow:0 12px 30px rgba(15,23,42,.14);padding:6px;border-radius:18px;backdrop-filter:blur(12px);z-index:20}
+.nav-page{border:0;background:transparent;color:#6b7280;border-radius:13px;padding:9px 16px;font-size:13px;font-weight:900;min-width:92px}.nav-page.active{background:#111827;color:#fff}
+@supports(padding:max(0px)){.page{padding-bottom:max(78px,calc(66px + env(safe-area-inset-bottom)))}}
+@media(min-width:760px){.page{padding:28px 26px 98px}.tabs{grid-template-columns:repeat(4,1fr)}.krw{font-size:42px}}
+
+/* V5.4 Settings */
+#settingsPage{padding-bottom:170px}
+.lock-mini{width:34px;height:34px;border:0;border-radius:11px;background:#fff;color:#374151;box-shadow:0 8px 20px rgba(15,23,42,.08);font-size:15px;cursor:pointer}
+.member-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.member-tab{border:0;border-radius:14px;padding:12px 6px;background:#eef2f7;color:#374151;font-size:14px;font-weight:900;cursor:pointer}
+.member-tab.active{background:var(--blue);color:#fff}
+.summary-card{padding:20px 20px 18px}
+.summary-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.eyebrow{font-size:13px;color:var(--muted);font-weight:900}
+.owner-name{font-size:26px;font-weight:900;letter-spacing:-.8px;margin-top:3px}
+.owner-total{font-size:23px;font-weight:900;text-align:right;letter-spacing:-.6px}
+.owner-total-sub{font-size:12px;color:var(--muted);font-weight:800;text-align:right;margin-top:5px}
+.sync-note{display:flex;align-items:center;gap:9px;margin-top:16px;padding:12px 14px;border:1px solid #dbeafe;background:#f8fbff;border-radius:16px;color:#1e40af;font-size:13px;font-weight:800}
+.sync-note.error{border-color:#fecaca;background:#fff7f7;color:#b91c1c}
+.sync-note.loading{border-color:#fde68a;background:#fffbeb;color:#92400e}
+.sync-dot{width:9px;height:9px;border-radius:50%;background:#10b981;box-shadow:0 0 0 4px rgba(16,185,129,.12);flex:0 0 auto}
+.sync-note.error .sync-dot{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+.sync-note.loading .sync-dot{background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:18px 2px 10px}
+.section-title{font-size:16px;font-weight:900}
+.section-sub{font-size:12px;color:var(--muted);font-weight:800}
+.account-card{padding:0;overflow:hidden;border:1px solid rgba(229,231,235,.75)}
+.account-head{width:100%;border:0;background:#fff;padding:18px 18px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;text-align:left}
+.account-head-left{min-width:0}.account-name{font-size:17px;font-weight:900;letter-spacing:-.3px}.account-meta{font-size:12px;color:var(--muted);font-weight:800;margin-top:5px}
+.account-head-right{text-align:right;flex:0 0 auto}.account-total{font-size:15px;font-weight:900}.chev{display:inline-block;margin-top:5px;color:#9ca3af;font-size:14px;transition:transform .18s}
+.account-card.collapsed .chev{transform:rotate(-90deg)}.asset-list{border-top:1px solid var(--line)}.account-card.collapsed .asset-list{display:none}
+.asset-row{padding:15px 18px;display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:14px;align-items:center}.asset-row+.asset-row{border-top:1px solid #eef2f7}
+.asset-name{font-size:14px;font-weight:900;line-height:1.3}.asset-meta{font-size:12px;color:var(--muted);font-weight:800;margin-top:5px;line-height:1.35}
+.qty-box{display:flex;align-items:center;background:#f8fafc;border:1.5px solid #dbe3ee;border-radius:14px;overflow:hidden;transition:.15s}.qty-box:focus-within{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(37,99,235,.08);background:#fff}
+.qty-input{width:100%;min-width:0;border:0;background:transparent;outline:none;text-align:right;padding:12px 7px 12px 10px;font-size:16px;font-weight:900;color:#111827;font-variant-numeric:tabular-nums}.qty-unit{padding-right:10px;font-size:11px;color:var(--muted);font-weight:900;white-space:nowrap}
+.settings-footer-actions{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);width:min(calc(100% - 32px),760px);z-index:15;display:none;gap:8px;pointer-events:none}.settings-footer-actions.show{display:flex}
+.action-btn{pointer-events:auto;border:0;border-radius:16px;padding:13px 16px;font-size:14px;font-weight:900;box-shadow:0 10px 24px rgba(15,23,42,.12);cursor:pointer}.action-btn:disabled{opacity:.55;cursor:default}
+.save-btn{flex:1;background:#111827;color:#fff}.reset-btn{width:92px;background:#fff;color:#4b5563;border:1px solid #e5e7eb}
+.empty{padding:32px 20px;text-align:center;color:var(--muted);font-weight:800}.toast{position:fixed;left:50%;bottom:155px;transform:translate(-50%,14px);background:#111827;color:white;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:900;opacity:0;pointer-events:none;transition:.2s;z-index:130;box-shadow:0 10px 26px rgba(15,23,42,.2)}.toast.show{opacity:1;transform:translate(-50%,0)}
+.lock-screen{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#eef4ff 0%,#f7f9fc 52%,#f3f6fb 100%);display:none;align-items:center;justify-content:center;padding:24px}.lock-screen.show{display:flex}
+.lock-card{width:min(100%,390px);background:#fff;border:1px solid rgba(226,232,240,.95);border-radius:28px;box-shadow:0 24px 60px rgba(15,23,42,.14);padding:28px 24px 24px;text-align:center}.lock-icon{width:58px;height:58px;border-radius:19px;margin:0 auto 16px;display:grid;place-items:center;background:#eaf1ff;color:#2563eb;font-size:26px}.lock-title{font-size:24px;font-weight:950;letter-spacing:-.7px}.lock-sub{margin-top:8px;color:#6b7280;font-size:13px;font-weight:800;line-height:1.55}.pin-wrap{margin-top:24px;display:flex;gap:10px;align-items:center}.pin-input{flex:1;min-width:0;border:1.5px solid #dbe3ee;background:#f8fafc;border-radius:16px;padding:15px 16px;outline:none;font-size:20px;font-weight:900;letter-spacing:5px;text-align:center;font-variant-numeric:tabular-nums}.pin-input.secure-pin{-webkit-text-security:disc;text-security:disc}.pin-input:focus{border-color:#93c5fd;background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.08)}.unlock-btn{border:0;border-radius:16px;background:#111827;color:#fff;padding:16px 18px;font-size:14px;font-weight:900;cursor:pointer;white-space:nowrap}.unlock-btn:disabled{opacity:.55}.pin-error{min-height:20px;margin-top:10px;color:#dc2626;font-size:12px;font-weight:900;opacity:0;transition:.15s}.pin-error.show{opacity:1}.lock-hint{margin-top:12px;color:#9ca3af;font-size:11px;font-weight:800}.lock-cancel{margin-top:14px;border:0;background:transparent;color:#6b7280;font-size:12px;font-weight:900;cursor:pointer}
+@media(max-width:430px){.member-tab{font-size:13px;padding:11px 4px}.owner-total{font-size:20px}.asset-row{grid-template-columns:minmax(0,1fr) 106px;padding-left:16px;padding-right:16px}.nav-page{min-width:78px;padding-left:11px;padding-right:11px}.lock-card{padding:26px 20px 22px}.pin-wrap{gap:8px}.unlock-btn{padding-left:15px;padding-right:15px}}
+
+/* Home initial data loading gate */
+.home-loading-screen{position:fixed;inset:0;z-index:90;background:linear-gradient(180deg,#eef4ff 0%,#f7f9fc 52%,#f3f6fb 100%);display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .22s ease,visibility .22s ease}
+.home-loading-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.home-loading-card{width:min(100%,390px);background:#fff;border:1px solid rgba(226,232,240,.95);border-radius:28px;box-shadow:0 24px 60px rgba(15,23,42,.14);padding:30px 24px;text-align:center}
+.home-loading-spinner{width:46px;height:46px;margin:0 auto 18px;border:4px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:homeSpin .85s linear infinite}
+.home-loading-screen.error .home-loading-spinner{display:none}
+.home-loading-title{font-size:21px;font-weight:950;letter-spacing:-.5px}
+.home-loading-sub{margin-top:9px;color:#6b7280;font-size:13px;font-weight:800;line-height:1.55}
+.home-loading-retry{display:none;margin:18px auto 0;border:0;border-radius:15px;background:#111827;color:#fff;padding:13px 20px;font-size:14px;font-weight:900;cursor:pointer}
+.home-loading-screen.error .home-loading-retry{display:block}
+@keyframes homeSpin{to{transform:rotate(360deg)}}
+
+</style>
+</head>
+<body>
+<div class="home-loading-screen hidden" id="homeLoadingScreen" role="status" aria-live="polite" aria-busy="false">
+  <div class="home-loading-card">
+    <div class="home-loading-spinner" aria-hidden="true"></div>
+    <div class="home-loading-title" id="homeLoadingTitle">자산 데이터를 불러오는 중입니다</div>
+    <div class="home-loading-sub" id="homeLoadingSub">Supabase에서 최신 보유 수량과 자산 정보를 확인하고 있어요.</div>
+    <button class="home-loading-retry" id="homeLoadingRetry" type="button">다시 불러오기</button>
+  </div>
+</div>
+<div class="pages" id="pages">
+<section class="page active" id="homePage"><div class="inner">
+<div class="header"><div class="brand">MS Project</div><div class="header-actions"><button class="showcase-toggle" type="button" role="switch" aria-checked="true"><span class="showcase-option showcase-private">자랑모드</span><span class="showcase-divider">|</span><span class="showcase-option showcase-public">공개모드</span></button><div class="badge">v5.4</div></div></div>
+<div class="card total"><div class="label">총 순자산</div><div class="krw" id="homeTotalKrw">—</div><div class="usd" id="homeTotalUsd">—</div><div class="home-sync loading" id="homeSyncStatus">Supabase 보유 수량을 확인하는 중입니다.</div></div>
+<div class="card">
+<div class="label">자산 배분</div>
+<div class="chart-wrap"><canvas id="donutChart"></canvas><div class="center"><div class="mini">TOTAL</div><div class="main" id="homeDonutTotal">—</div></div></div>
+<div class="asset-info" id="assetInfo"><div class="asset-info-title">자산을 눌러보세요</div><div class="asset-info-sub">선택한 자산의 금액과 비중이 여기에 표시됩니다.</div></div>
+<div class="legend" id="assetLegend"></div>
+<div class="hint">아래 History 버튼을 누르면 자산 이력 그래프로 이동합니다.</div>
+</div>
+</div></section>
+
+<section class="page" id="historyPage"><div class="inner">
+<div class="header"><div class="brand">History</div><div class="header-actions"><button class="showcase-toggle" type="button" role="switch" aria-checked="true"><span class="showcase-option showcase-private">자랑모드</span><span class="showcase-divider">|</span><span class="showcase-option showcase-public">공개모드</span></button><div class="badge">월별 추이</div></div></div>
+<div class="card">
+<div class="title-row"><h2>자산 성장 그래프</h2><div class="sub">선택된 점 강조 + 지수 추세선</div></div>
+<div class="tabs">
+<button class="tab active" onclick="setMode('krwLinear',this)">KRW</button>
+<button class="tab" onclick="setMode('krwLog',this)">KRW Log</button>
+<button class="tab" onclick="setMode('usdLinear',this)">USD</button>
+<button class="tab" onclick="setMode('usdLog',this)">USD Log</button>
+</div>
+<div class="canvas-box"><canvas id="historyChart"></canvas></div>
+<div class="info" id="pointInfo">
+<div class="info-top">
+<button class="navbtn" onclick="movePoint(-1)">&lt;</button>
+<div class="info-body" id="infoBody"><div class="info-date">그래프의 점 또는 버튼을 눌러보세요</div><div class="info-main">선택한 날짜의 순자산 표시</div><div class="info-sub">이전/다음 데이터 이동 가능</div></div>
+<button class="navbtn" onclick="movePoint(1)">&gt;</button>
+</div>
+</div>
+</div>
+
+<div class="card" id="historyCompositionCard">
+<div class="title-row"><h2>선택 날짜 자산 배분</h2><div class="sub" id="historyCompositionSub">Supabase에서 자산구성을 불러오는 중입니다.</div></div>
+<div class="chart-wrap"><canvas id="historyDonutChart"></canvas><div class="center"><div class="mini" id="historyDonutDate">HISTORY</div><div class="main" id="historyDonutTotal">-</div></div></div>
+<div class="asset-info" id="historyAssetInfo"><div class="asset-info-title">자산을 눌러보세요</div><div class="asset-info-sub">선택한 날짜의 자산 금액과 비중이 표시됩니다.</div></div>
+<div class="legend" id="historyAssetLegend"></div>
+</div>
+
+</div></section>
+
+<section class="page" id="settingsPage"><div class="inner">
+  <div class="header">
+    <div class="brand">Settings</div>
+    <div class="header-actions"><button class="lock-mini" id="lockMiniBtn" type="button" aria-label="설정 잠그기">🔒</button><div class="badge">Supabase</div></div>
+  </div>
+  <div class="card">
+    <div class="member-tabs" id="memberTabs"></div>
+  </div>
+  <div class="card summary-card">
+    <div class="summary-top">
+      <div><div class="eyebrow">보유 수량·금액 관리</div><div class="owner-name" id="ownerName">잠금 상태</div></div>
+      <div><div class="owner-total" id="ownerTotal">₩0</div><div class="owner-total-sub">현재 기준가 기준 예상 평가액</div></div>
+    </div>
+    <div class="sync-note loading" id="settingsSyncNote"><span class="sync-dot"></span><span id="settingsSyncText">Supabase 연결 대기 중입니다.</span></div>
+  </div>
+  <div class="section-head"><div class="section-title">계좌별 보유자산</div><div class="section-sub" id="accountCount">0개 계좌</div></div>
+  <div id="accountList"><div class="card empty">Settings 잠금을 해제하면 데이터를 불러옵니다.</div></div>
+</div></section>
+
+</div>
+<nav class="bottom-nav" aria-label="페이지 이동">
+<button class="nav-page active" id="homeNav" type="button" onclick="showPage(0)">Home</button>
+<button class="nav-page" id="historyNav" type="button" onclick="showPage(1)">History</button>
+<button class="nav-page" id="settingsNav" type="button" onclick="showPage(2)">Settings</button>
+</nav>
+<div class="settings-footer-actions" id="settingsFooterActions">
+  <button class="action-btn reset-btn" id="resetBtn" type="button">되돌리기</button>
+  <button class="action-btn save-btn" id="saveBtn" type="button">변경사항 저장</button>
+</div>
+<div class="toast" id="toast">저장했습니다</div>
+<div class="lock-screen" id="lockScreen" aria-modal="true" role="dialog" aria-labelledby="lockTitle">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title" id="lockTitle">Settings 잠금</div>
+    <div class="lock-sub">보유 자산을 확인하거나 수정하려면<br>공개모드와 같은 8자리 비밀번호를 입력해 주세요.</div>
+    <div class="pin-wrap">
+      <input class="pin-input secure-pin" id="pinInput" type="text" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" data-lpignore="true" maxlength="8" placeholder="••••••••" aria-label="8자리 비밀번호">
+      <button class="unlock-btn" id="unlockBtn" type="button">열기</button>
+    </div>
+    <div class="pin-error" id="pinError">비밀번호가 올바르지 않거나 DB 설정이 필요합니다.</div>
+    <div class="lock-hint">Supabase에서 비밀번호를 확인합니다.</div>
+    <button class="lock-cancel" id="lockCancelBtn" type="button">← 이전 화면으로 돌아가기</button>
+  </div>
+</div>
+<div class="lock-screen" id="publicModeLock" aria-modal="true" role="dialog" aria-labelledby="publicModeLockTitle">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title" id="publicModeLockTitle">공개모드 잠금</div>
+    <div class="lock-sub">실제 자산 금액을 표시하려면<br>비밀번호를 입력해 주세요.</div>
+    <div class="pin-wrap">
+      <input class="pin-input secure-pin" id="publicModePassword" type="text" inputmode="numeric" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" data-lpignore="true" maxlength="8" placeholder="••••••••" aria-label="공개모드 8자리 비밀번호">
+      <button class="unlock-btn" id="publicModeUnlockBtn" type="button">공개하기</button>
+    </div>
+    <div class="pin-error" id="publicModeError">비밀번호가 올바르지 않습니다.</div>
+    <div class="lock-hint">비밀번호를 아는 사람만 실제 금액을 볼 수 있습니다.</div>
+    <button class="lock-cancel" id="publicModeCancelBtn" type="button">자랑모드 유지</button>
+  </div>
+</div>
+
+<script>
+const SHOWCASE_ASSETS=[['주식 A',24],['주식 B',20],['주식 C',16],['채권',12],['외화',9],['금',7],['디지털자산',5],['현금',4],['부동산',3]];
+let HOME_BASE_TOTAL_KRW=0;
+let HOME_BASE_TOTAL_USD=0;
+let HOME_BASE_ASSETS=SHOWCASE_ASSETS.map(([name,value])=>[name,value]);
+let assetData=HOME_BASE_ASSETS.map(([name,value])=>[name,value,'비중 비공개']);
+const colors=['#3B82F6','#1D4ED8','#93C5FD','#14B8A6','#F59E0B','#EAB308','#8B5CF6','#9CA3AF','#10B981'];
+let showcaseMode=true;
+function won(v){return showcaseMode?'₩ 비공개':'₩'+Math.round(v).toLocaleString('ko-KR')}
+function usd(v){return showcaseMode?'$ 비공개':'$'+Math.round(v).toLocaleString('en-US')}
+function compactWon(v){return showcaseMode?'비공개':(v/100000000).toFixed(1)+'억'}
+function chartTooltipAmount(context){return showcaseMode?'비공개':Math.round(Number(context.raw)||0).toLocaleString('ko-KR')}
+
+const SUPABASE_URL='https://rcauycwrtqtuyllnsxog.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_LgwDvvWiaINxb7KYS_lW_A_7E91Q19c';
+
+// Personal values are returned only by password-protected Supabase RPCs.
+const APP_DATA_RPC='get_ms_app_data';
+const SETTINGS_VERIFY_RPC='verify_ms_password';
+const SETTINGS_SAVE_RPC='save_ms_portfolio_holdings';
+let settingsFx=1;
+let settingsPrices={};
+let settingsInitialData={};
+let settingsOwnerOrder=[];
+let HOME_ASSET_CATEGORY={};
+let HOME_DIRECT_VALUE_ASSETS={};
+let HOME_REPLACE_QUANTITY_ASSETS={};
+let HOME_HOUSE_ASSET='';
+let HOME_LOAN_ASSET='';
+let HOME_BASE_ASSET_MAP=Object.fromEntries(HOME_BASE_ASSETS.map(([name,value])=>[name,value]));
+function aggregateQuantitiesFromSettingsData(data){
+  const totals={};
+  Object.values(data).forEach(person=>person.accounts.forEach(acc=>acc.assets.forEach(([name,qty])=>{totals[name]=(totals[name]||0)+(Number(qty)||0)})));
+  return totals;
+}
+function aggregateQuantitiesFromRows(rows){
+  const totals={};
+  (rows||[]).forEach(row=>{
+    const name=String(row.asset_name||'').trim();
+    if(!name) return;
+    totals[name]=(totals[name]||0)+(Number(row.quantity)||0);
+  });
+  return totals;
+}
+let HOME_BASE_QUANTITIES={};
+let homeDashboardLoaded=false;
+let homeDashboardLoading=false;
+let homeCurrentTotalKrw=null;
+let homeCurrentTotalUsd=null;
+let appDataLoaded=false;
+const homeLoadingScreen=document.getElementById('homeLoadingScreen');
+const homeLoadingTitle=document.getElementById('homeLoadingTitle');
+const homeLoadingSub=document.getElementById('homeLoadingSub');
+const homeLoadingRetry=document.getElementById('homeLoadingRetry');
+function setInitialHomeLoading(state='loading',message='Supabase에서 최신 보유 수량과 자산 정보를 확인하고 있어요.'){
+  if(!homeLoadingScreen) return;
+  homeLoadingScreen.classList.remove('hidden','error');
+  homeLoadingScreen.setAttribute('aria-busy',state==='loading'?'true':'false');
+  if(state==='error'){
+    homeLoadingScreen.classList.add('error');
+    if(homeLoadingTitle) homeLoadingTitle.textContent='자산 데이터를 불러오지 못했습니다';
+    if(homeLoadingSub) homeLoadingSub.textContent=message;
+  }else{
+    if(homeLoadingTitle) homeLoadingTitle.textContent='자산 데이터를 불러오는 중입니다';
+    if(homeLoadingSub) homeLoadingSub.textContent=message;
+  }
+}
+function hideInitialHomeLoading(){
+  if(!homeLoadingScreen) return;
+  homeLoadingScreen.setAttribute('aria-busy','false');
+  homeLoadingScreen.classList.add('hidden');
+}
+if(homeLoadingRetry) homeLoadingRetry.addEventListener('click',()=>appDataLoaded?loadDashboardHoldings(true):openPublicModeLock());
+function setHomeSyncStatus(state,text){
+  const el=document.getElementById('homeSyncStatus');
+  if(!el) return;
+  el.classList.remove('loading','error');
+  if(state==='loading') el.classList.add('loading');
+  if(state==='error') el.classList.add('error');
+  el.textContent=text;
+}
+function homeCategoryForAsset(assetName){
+  return HOME_ASSET_CATEGORY[assetName]
+    || HOME_DIRECT_VALUE_ASSETS[assetName]
+    || HOME_REPLACE_QUANTITY_ASSETS[assetName]
+    || ((assetName===HOME_HOUSE_ASSET||assetName===HOME_LOAN_ASSET)?'주택':'');
+}
+function calculateHomeSnapshot(currentQuantities){
+  const quantities=currentQuantities||{};
+  const categoryOrder=[];
+  const categoryTotals={};
+  const ensureCategory=category=>{
+    const name=String(category||'').trim();
+    if(!name) return '';
+    if(!Object.prototype.hasOwnProperty.call(categoryTotals,name)){
+      categoryOrder.push(name);
+      categoryTotals[name]=0;
+    }
+    return name;
+  };
+
+  HOME_BASE_ASSETS.forEach(([category])=>ensureCategory(category));
+  Object.entries(quantities).forEach(([assetName,quantity])=>{
+    const value=settingsAssetValue(assetName,quantity);
+    if(!Number.isFinite(value)) return;
+    const category=ensureCategory(homeCategoryForAsset(assetName)||'기타');
+    categoryTotals[category]+=value;
+  });
+
+  const totalKrw=Math.round(Object.entries(quantities).reduce(
+    (sum,[assetName,quantity])=>sum+settingsAssetValue(assetName,quantity),0
+  ));
+  const assets=categoryOrder.map(category=>[category,Math.round(categoryTotals[category]||0)]);
+
+  // 자산군별 반올림으로 생길 수 있는 몇 원의 차이도 Home 총액과 정확히 맞춥니다.
+  const allocatedTotal=assets.reduce((sum,asset)=>sum+asset[1],0);
+  if(assets.length&&allocatedTotal!==totalKrw){
+    let targetIndex=0;
+    assets.forEach((asset,index)=>{
+      if(Math.abs(asset[1])>Math.abs(assets[targetIndex][1])) targetIndex=index;
+    });
+    assets[targetIndex][1]+=totalKrw-allocatedTotal;
+  }
+  return {assets,totalKrw};
+}
+function applyHomeQuantities(currentQuantities,sourceText='Supabase 자산 반영 완료'){
+  const snapshot=calculateHomeSnapshot(currentQuantities);
+  assetData=snapshot.assets.map(([name,value])=>[name,value,'0.00%']);
+  const allocationTotal=assetData.reduce((sum,a)=>sum+a[1],0);
+  assetData.forEach(a=>a[2]=(allocationTotal?((a[1]/allocationTotal)*100):0).toFixed(2)+'%');
+  const totalKrw=snapshot.totalKrw;
+  const totalUsd=Math.round(totalKrw/Math.max(settingsFx,1));
+  homeCurrentTotalKrw=totalKrw;
+  homeCurrentTotalUsd=totalUsd;
+  const totalKrwEl=document.getElementById('homeTotalKrw');
+  const totalUsdEl=document.getElementById('homeTotalUsd');
+  const donutTotalEl=document.getElementById('homeDonutTotal');
+  if(totalKrwEl) totalKrwEl.textContent=won(totalKrw);
+  if(totalUsdEl) totalUsdEl.textContent=usd(totalUsd);
+  if(donutTotalEl) donutTotalEl.textContent=compactWon(totalKrw);
+  if(typeof selectedHomeAsset!=='undefined'&&selectedHomeAsset>=assetData.length) selectedHomeAsset=-1;
+  if(typeof donut!=='undefined'){
+    donut.data.labels=assetData.map(x=>x[0]);
+    donut.data.datasets[0].data=assetData.map(x=>x[1]);
+    donut.data.datasets[0].backgroundColor=assetData.map((_,i)=>colors[i%colors.length]);
+    donut.data.datasets[0].offset=assetData.map((_,i)=>i===selectedHomeAsset?14:0);
+    donut.update();
+  }
+  if(typeof renderHomeLegend==='function') renderHomeLegend();
+  homeDashboardLoaded=true;
+  setHomeSyncStatus('ok',sourceText+' · Home과 Settings에 같은 수량·기준가를 적용했습니다.');
+}
+async function loadDashboardHoldings(showMessage=false,forceInitialGate=false){
+  if(!appDataLoaded||homeDashboardLoading) return;
+  homeDashboardLoading=true;
+  if(forceInitialGate) setInitialHomeLoading('loading');
+  applyHomeQuantities(HOME_BASE_QUANTITIES,'Supabase 보안 데이터 반영됨');
+  hideInitialHomeLoading();
+  if(showMessage) showToast('Supabase 데이터를 다시 표시했습니다');
+  homeDashboardLoading=false;
+}
+function settingsClone(v){return JSON.parse(JSON.stringify(v))}
+let settingsData=settingsClone(settingsInitialData);
+let settingsSelectedOwner='';
+let settingsUnlocked=false;
+let settingsSessionPin='';
+let settingsLoaded=false;
+let settingsLastPage=0;
+
+const lockScreen=document.getElementById('lockScreen');
+const pinInput=document.getElementById('pinInput');
+const pinError=document.getElementById('pinError');
+const unlockBtn=document.getElementById('unlockBtn');
+const lockMiniBtn=document.getElementById('lockMiniBtn');
+const lockCancelBtn=document.getElementById('lockCancelBtn');
+const memberTabs=document.getElementById('memberTabs');
+const ownerName=document.getElementById('ownerName');
+const ownerTotal=document.getElementById('ownerTotal');
+const accountCount=document.getElementById('accountCount');
+const accountList=document.getElementById('accountList');
+const settingsSyncNote=document.getElementById('settingsSyncNote');
+const settingsSyncText=document.getElementById('settingsSyncText');
+const settingsFooterActions=document.getElementById('settingsFooterActions');
+const saveBtn=document.getElementById('saveBtn');
+const resetBtn=document.getElementById('resetBtn');
+const toast=document.getElementById('toast');
+
+function settingsHeaders(json=false){
+  const headers={apikey:SUPABASE_PUBLISHABLE_KEY};
+  if(json) headers['Content-Type']='application/json';
+  return headers;
+}
+function setSettingsSync(state,text){
+  settingsSyncNote.classList.remove('loading','error');
+  if(state==='loading') settingsSyncNote.classList.add('loading');
+  if(state==='error') settingsSyncNote.classList.add('error');
+  settingsSyncText.textContent=text;
+}
+function showToast(message){
+  toast.textContent=message;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('show'),1700);
+}
+async function readSettingsResponse(response){
+  const text=await response.text();
+  let payload=null;
+  if(text){
+    try{payload=JSON.parse(text)}catch{payload=text}
+  }
+  if(!response.ok){
+    const detail=payload&&typeof payload==='object'
+      ? [payload.message,payload.details,payload.hint].filter(Boolean).join(' · ')
+      : String(payload||`HTTP ${response.status}`);
+    throw new Error(detail||`HTTP ${response.status}`);
+  }
+  return payload;
+}
+function settingsErrorMessage(error){
+  const message=String(error?.message||'알 수 없는 오류').replace(/\s+/g,' ').trim();
+  return message.length>120?message.slice(0,117)+'...':message;
+}
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+function settingsQty(v){return Number(v).toLocaleString('en-US',{maximumFractionDigits:4,useGrouping:false})}
+function settingsAssetValue(name,quantity){
+  const p=settingsPrices[name]; if(!p) return 0;
+  const value=(Number(quantity)||0)*p.price*(p.currency==='USD'?settingsFx:1);
+  return p.liability ? -value : value;
+}
+function settingsAssetDisplayValue(name,quantity){return Math.abs(settingsAssetValue(name,quantity))}
+function settingsOwnerValue(owner){return settingsData[owner].accounts.reduce((sum,acc)=>sum+acc.assets.reduce((s,a)=>s+settingsAssetValue(a[0],a[1]),0),0)}
+function settingsAccountValue(acc){return acc.assets.reduce((s,a)=>s+settingsAssetValue(a[0],a[1]),0)}
+function settingsMetaText(name){
+  const p=settingsPrices[name]; if(!p) return '가격 정보 없음';
+  if(p.liability) return '부채 잔액 직접 입력 · Home 순자산에서 차감';
+  if(p.referencePrice) return `보유량 입력 · Supabase 기준가 ${won(p.price)}/${p.unit}`;
+  if(p.directValue) return '원화 금액 직접 입력';
+  if(p.currency==='USD'&&p.price===1) return `환율 ${won(settingsFx)} · 입력 단위 USD`;
+  return p.currency==='USD' ? `$${Number(p.price).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} · 환율 ${won(settingsFx)}` : `${won(p.price)} · 국내 가격`;
+}
+function rowsToSettingsData(rows){
+  const result={};
+  const accountMaps={};
+  rows.forEach(row=>{
+    const owner=String(row.owner_key||'').trim();
+    if(!owner) return;
+    if(!result[owner]){
+      result[owner]={label:String(row.owner_label||owner),accounts:[]};
+      accountMaps[owner]=new Map();
+    }
+    const accountName=String(row.account_name||'').trim();
+    const assetName=String(row.asset_name||'').trim();
+    if(!accountName||!assetName) return;
+    if(!accountMaps[owner].has(accountName)){
+      const acc={name:accountName,type:String(row.account_type||'계좌'),assets:[]};
+      accountMaps[owner].set(accountName,acc); result[owner].accounts.push(acc);
+    }
+    accountMaps[owner].get(accountName).assets.push([assetName,Number(row.quantity)||0]);
+  });
+  settingsOwnerOrder=Object.keys(result);
+  return result;
+}
+function flattenSettingsData(){
+  const rows=[]; let order=1;
+  settingsOwnerOrder.forEach(owner=>{
+    settingsData[owner].accounts.forEach(acc=>{
+      acc.assets.forEach(asset=>{
+        rows.push({owner_key:owner,owner_label:settingsData[owner].label,account_name:acc.name,account_type:acc.type,asset_name:asset[0],quantity:Number(asset[1])||0,sort_order:order++});
+      });
+    });
+  });
+  return rows;
+}
+async function verifySettingsPin(passcode){
+  const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${SETTINGS_VERIFY_RPC}`,{method:'POST',headers:settingsHeaders(true),body:JSON.stringify({p_password:passcode})});
+  if(!response.ok) throw new Error(await response.text()||`HTTP ${response.status}`);
+  return response.json();
+}
+async function loadSettingsHoldings(showMessage=false){
+  setSettingsSync('loading','Supabase에서 보유 수량을 불러오는 중입니다.');
+  resetBtn.disabled=true; saveBtn.disabled=true;
+  try{
+    if(!settingsSessionPin) throw new Error('Settings session is locked.');
+    const payload=await fetchAppData(settingsSessionPin);
+    applyAppData(payload);
+    const rows=flattenSettingsData();
+    if(!rows.length) throw new Error('보유 수량 데이터가 없습니다.');
+    settingsLoaded=true;
+    renderMemberTabs();renderSettings();
+    setSettingsSync('ok',`Supabase 연결됨 · ${rows.length}개 보유 항목`);
+    if(showMessage) showToast('저장된 수량을 다시 불러왔습니다');
+  }catch(error){
+    console.error('Settings holdings load failed:',error);
+    settingsLoaded=false;
+    settingsData=settingsClone(settingsInitialData);
+    renderSettings();
+    setSettingsSync('error','Supabase 설정이 필요합니다. 함께 제공된 SQL을 먼저 실행해 주세요.');
+  }finally{
+    resetBtn.disabled=false; saveBtn.disabled=false;
+  }
+}
+async function unlockSettings(){
+  const passcode=pinInput.value;
+  if(passcode.length!==8){
+    pinError.textContent='8자리 비밀번호를 입력해 주세요.';
+    pinError.classList.add('show');pinInput.focus();return;
+  }
+  unlockBtn.disabled=true; pinError.classList.remove('show');
+  try{
+    const ok=await verifySettingsPin(passcode);
+    if(ok!==true) throw new Error('invalid passcode');
+    settingsSessionPin=passcode; settingsUnlocked=true;
+    lockScreen.classList.remove('show'); pinInput.value='';
+    document.body.style.overflow='';
+    showPage(2,true);
+    const rows=flattenSettingsData();
+    if(appDataLoaded&&rows.length){
+      settingsLoaded=true;
+      renderMemberTabs();renderSettings();
+      setSettingsSync('ok',`Supabase 연결됨 · ${rows.length}개 보유 항목`);
+    }else{
+      await loadSettingsHoldings();
+    }
+  }catch(error){
+    console.error('Settings unlock failed:',error);
+    pinError.textContent='비밀번호가 올바르지 않거나 잠시 잠겼습니다.';
+    pinError.classList.add('show'); pinInput.select();
+  }finally{unlockBtn.disabled=false}
+}
+function lockSettings(){
+  settingsUnlocked=false;settingsSessionPin='';pinInput.value='';pinError.classList.remove('show');
+  if(page===2){lockScreen.classList.add('show');document.body.style.overflow='hidden';setTimeout(()=>pinInput.focus(),60)}
+}
+function requestSettingsUnlock(previousPage){
+  settingsLastPage=previousPage;
+  lockScreen.classList.add('show');document.body.style.overflow='hidden';pinInput.value='';pinError.classList.remove('show');setTimeout(()=>pinInput.focus(),60);
+}
+function renderMemberTabs(){
+  memberTabs.innerHTML='';
+  if(!settingsOwnerOrder.length){settingsSelectedOwner='';return}
+  if(!settingsData[settingsSelectedOwner]) settingsSelectedOwner=settingsOwnerOrder[0];
+  settingsOwnerOrder.forEach(owner=>{
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='member-tab'+(owner===settingsSelectedOwner?' active':'');btn.dataset.owner=owner;
+    btn.textContent=settingsData[owner].label;
+    btn.addEventListener('click',()=>{
+      settingsSelectedOwner=owner;
+      memberTabs.querySelectorAll('.member-tab').forEach(x=>x.classList.toggle('active',x===btn));
+      renderSettings();window.scrollTo({top:0,behavior:'smooth'});
+    });
+    memberTabs.appendChild(btn);
+  });
+}
+function renderSettings(){
+  const person=settingsData[settingsSelectedOwner];
+  if(!person){
+    ownerName.textContent='잠금 상태';ownerTotal.textContent='₩0';accountCount.textContent='0개 계좌';
+    accountList.innerHTML='<div class="card empty">공개모드와 Settings 잠금을 해제하면 데이터를 불러옵니다.</div>';
+    return;
+  }
+  ownerName.textContent=person.label;
+  ownerTotal.textContent=won(settingsOwnerValue(settingsSelectedOwner));
+  accountCount.textContent=`${person.accounts.length}개 계좌`;
+  accountList.innerHTML='';
+  if(!person.accounts.length){accountList.innerHTML='<div class="card empty">등록된 계좌가 없습니다.</div>';return}
+  person.accounts.forEach((acc,accIndex)=>{
+    const card=document.createElement('section');card.className='card account-card';
+    card.innerHTML=`<button class="account-head" type="button" aria-expanded="true"><span class="account-head-left"><span class="account-name">${escapeHtml(acc.name)}</span><span class="account-meta">${escapeHtml(acc.type)} · ${acc.assets.length}개 자산</span></span><span class="account-head-right"><span class="account-total">${won(settingsAccountValue(acc))}</span><span class="chev">⌄</span></span></button><div class="asset-list"></div>`;
+    const list=card.querySelector('.asset-list');
+    acc.assets.forEach((asset,assetIndex)=>{
+      const [name,quantity]=asset;const row=document.createElement('div');row.className='asset-row';
+      const directInput=Boolean(settingsPrices[name]?.directValue);
+      row.innerHTML=`<div><div class="asset-name">${escapeHtml(name)}</div><div class="asset-meta">${escapeHtml(settingsMetaText(name))} · ${won(settingsAssetDisplayValue(name,quantity))}</div></div><div class="qty-box"><input class="qty-input" type="number" inputmode="${directInput?'numeric':'decimal'}" min="0" step="${directInput?'1':'any'}" value="${settingsQty(quantity)}" aria-label="${escapeHtml(name)} ${directInput?'금액':'보유 수량'}"><span class="qty-unit">${escapeHtml(settingsPrices[name]?.unit||'')}</span></div>`;
+      const input=row.querySelector('input');
+      input.addEventListener('input',()=>{
+        const next=Math.max(0,Number(input.value)||0);settingsData[settingsSelectedOwner].accounts[accIndex].assets[assetIndex][1]=next;
+        row.querySelector('.asset-meta').textContent=`${settingsMetaText(name)} · ${won(settingsAssetDisplayValue(name,next))}`;
+        card.querySelector('.account-total').textContent=won(settingsAccountValue(settingsData[settingsSelectedOwner].accounts[accIndex]));ownerTotal.textContent=won(settingsOwnerValue(settingsSelectedOwner));
+        setSettingsSync('ok','수정 중 · 저장 버튼을 누르면 Supabase에 반영됩니다.');
+      });
+      list.appendChild(row);
+    });
+    card.querySelector('.account-head').addEventListener('click',()=>{card.classList.toggle('collapsed');card.querySelector('.account-head').setAttribute('aria-expanded',String(!card.classList.contains('collapsed')))});
+    accountList.appendChild(card);
+  });
+}
+async function saveSettingsHoldings(){
+  if(!settingsUnlocked||!settingsSessionPin){requestSettingsUnlock(page===2?0:page);return}
+  saveBtn.disabled=true;resetBtn.disabled=true;setSettingsSync('loading','Supabase에 수량을 저장하는 중입니다.');
+  try{
+    const rows=flattenSettingsData();
+    if(!rows.length) throw new Error('저장할 보유 항목이 없습니다.');
+    if(rows.some(row=>!Number.isFinite(row.quantity)||row.quantity<0)) throw new Error('수량은 0 이상의 숫자로 입력해 주세요.');
+    const quantities=aggregateQuantitiesFromRows(rows);
+    applyHomeQuantities(quantities,'저장할 자산을 계산했습니다');
+    const dashboard={
+      total_krw:homeCurrentTotalKrw,
+      total_usd:homeCurrentTotalUsd,
+      assets:assetData.map((a,i)=>({asset_name:a[0],amount_krw:a[1],sort_order:i+1}))
+    };
+    const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${SETTINGS_SAVE_RPC}`,{method:'POST',headers:settingsHeaders(true),body:JSON.stringify({p_password:settingsSessionPin,p_rows:rows,p_dashboard:dashboard})});
+    const result=await readSettingsResponse(response);
+    const returnedCount=typeof result==='object'&&result!==null?(result.saved_count??result.count):result;
+    const count=Number.isFinite(Number(returnedCount))?Number(returnedCount):rows.length;
+    HOME_BASE_TOTAL_KRW=homeCurrentTotalKrw;HOME_BASE_TOTAL_USD=homeCurrentTotalUsd;
+    HOME_BASE_ASSETS=assetData.map(a=>[a[0],a[1]]);HOME_BASE_ASSET_MAP=Object.fromEntries(HOME_BASE_ASSETS);
+    HOME_BASE_QUANTITIES={...quantities};settingsInitialData=settingsClone(settingsData);
+    applyHomeQuantities(quantities,'방금 저장한 자산 반영됨');
+    settingsLoaded=true;setSettingsSync('ok',`Supabase 저장 완료 · ${count}개 보유 항목`);showToast('변경사항을 저장하고 Home에 반영했습니다');
+  }catch(error){
+    console.error('Settings save failed:',error);
+    if(appDataLoaded) applyHomeQuantities(HOME_BASE_QUANTITIES,'저장 전 상태로 복원됨');
+    const message=settingsErrorMessage(error);
+    setSettingsSync('error',`저장 실패 · ${message}`);showToast('저장에 실패했습니다 · 화면의 오류를 확인해 주세요');
+  }finally{saveBtn.disabled=false;resetBtn.disabled=false}
+}
+
+unlockBtn.addEventListener('click',unlockSettings);
+pinInput.addEventListener('keydown',e=>{if(e.key==='Enter')unlockSettings()});
+pinInput.addEventListener('input',()=>{pinInput.value=pinInput.value.replace(/\D/g,'').slice(0,8);pinError.classList.remove('show')});
+lockMiniBtn.addEventListener('click',lockSettings);
+lockCancelBtn.addEventListener('click',()=>{lockScreen.classList.remove('show');document.body.style.overflow='';showPage(settingsLastPage,true)});
+saveBtn.addEventListener('click',saveSettingsHoldings);
+resetBtn.addEventListener('click',()=>loadSettingsHoldings(true));
+renderMemberTabs();renderSettings();
+
+
+const historyCompositionByDate=new Map();
+let historyDonut=null;
+let historyCompositionData=[];
+let historyCompositionReady=false;
+let historyCompositionDates=[];
+
+function assetColor(name,index){
+  const knownIndex=assetData.findIndex(a=>a[0]===name);
+  return knownIndex>=0 ? colors[knownIndex] : colors[index%colors.length];
+}
+
+function applyHistoryCompositionRows(rows){
+  historyCompositionByDate.clear();
+  (rows||[]).forEach(row=>{
+    const date=row.record_date;
+    const name=String(row.asset_name||'').trim();
+    const amount=Number(row.amount_krw);
+    const type=String(row.entry_type||'asset').toLowerCase();
+    if(!date || !name || !Number.isFinite(amount)) return;
+    if(!historyCompositionByDate.has(date)) historyCompositionByDate.set(date,[]);
+    historyCompositionByDate.get(date).push({name,amount,type});
+  });
+  historyCompositionDates=[...historyCompositionByDate.keys()].sort();
+  historyCompositionReady=historyCompositionByDate.size>0;
+  if(!historyCompositionReady){
+    historyCompositionSub.textContent='자산구성 기록이 없습니다.';
+    return;
+  }
+  historyCompositionSub.textContent=`DB ${historyCompositionByDate.size}개 날짜 연결됨`;
+  if(hist.length) renderHistoryComposition(hist[selectedIndex].date);
+  if(typeof hc!=='undefined') hc.update();
+}
+
+function renderHistoryComposition(date){
+  if(!historyCompositionReady){
+    historyDonutDate.textContent=showcaseMode?'HISTORY':date;
+    historyCompositionSub.textContent=showcaseMode?'공개모드에서 실제 기록을 불러옵니다.':'자산구성 기록이 없습니다.';
+    return;
+  }
+
+  // v4.6.4의 History 날짜 일부가 실제 DB 기록일과 며칠씩 달라서,
+  // 정확히 일치하지 않으면 같은 순서의 30개 기록을 연결합니다.
+  let compositionDate=date;
+  let rows=historyCompositionByDate.get(compositionDate);
+
+  if((!rows || !rows.length) && historyCompositionDates.length===hist.length){
+    compositionDate=historyCompositionDates[selectedIndex];
+    rows=historyCompositionByDate.get(compositionDate);
+  }
+
+  // 혹시 개수가 달라져도 가장 가까운 날짜를 마지막 안전장치로 사용합니다.
+  if(!rows || !rows.length){
+    const target=new Date(date).getTime();
+    compositionDate=historyCompositionDates.reduce((best,d)=>{
+      if(!best) return d;
+      return Math.abs(new Date(d).getTime()-target) < Math.abs(new Date(best).getTime()-target) ? d : best;
+    }, null);
+    rows=compositionDate ? historyCompositionByDate.get(compositionDate) : null;
+  }
+
+  historyDonutDate.textContent=compositionDate || date;
+
+  if(!rows || !rows.length){
+    historyCompositionSub.textContent=`${date} · 자산구성 기록 없음`;
+    historyDonutTotal.textContent='-';
+    historyAssetLegend.innerHTML='';
+    historyAssetInfo.innerHTML='<div class="asset-info-title">이 날짜의 자산구성 기록이 없습니다.</div><div class="asset-info-sub">DB 데이터를 다시 확인해주세요.</div>';
+    if(historyDonut){historyDonut.destroy();historyDonut=null;}
+    return;
+  }
+
+  // 부채는 도넛 조각으로 따로 표시하지 않고, 주택에서 차감해 현재 대시보드와 같은 '순주택자산'으로 보여줍니다.
+  const grouped=new Map();
+  let liabilities=0;
+  rows.forEach(r=>{
+    if(r.type==='liability') liabilities+=Math.abs(r.amount);
+    else grouped.set(r.name,(grouped.get(r.name)||0)+r.amount);
+  });
+  if(liabilities>0 && grouped.has('주택')) grouped.set('주택',Math.max(0,grouped.get('주택')-liabilities));
+
+  historyCompositionData=[...grouped.entries()]
+    .map(([name,amount])=>({name,amount}))
+    .filter(x=>x.amount>0);
+
+  const total=historyCompositionData.reduce((s,x)=>s+x.amount,0);
+  historyDonutTotal.textContent=compactWon(total);
+  historyCompositionSub.textContent=compositionDate===date ? `${date} · ${historyCompositionData.length}개 자산` : `${date} 선택 · DB 기록일 ${compositionDate} · ${historyCompositionData.length}개 자산`;
+
+  const labels=historyCompositionData.map(x=>x.name);
+  const values=historyCompositionData.map(x=>x.amount);
+  const bg=historyCompositionData.map((x,i)=>assetColor(x.name,i));
+
+  if(historyDonut) historyDonut.destroy();
+  historyDonut=new Chart(historyDonutChart,{
+    type:'doughnut',
+    data:{labels,datasets:[{data:values,backgroundColor:bg,borderWidth:3,borderColor:'#fff',offset:values.map(()=>0)}]},
+    options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:chartTooltipAmount}}},onClick:(e,els)=>{if(els.length)showHistoryAsset(els[0].index)}}
+  });
+
+  historyAssetLegend.innerHTML='';
+  historyCompositionData.forEach((a,i)=>{
+    const pct=total ? a.amount/total*100 : 0;
+    const el=document.createElement('div');
+    el.className='legend-item history-legend-item';
+    el.id='history-legend-'+i;
+    el.innerHTML=`<div class="legend-top"><span class="dot" style="background:${bg[i]}"></span>${escapeHtml(a.name)}</div><div class="legend-money">${showcaseMode?'비중 비공개':pct.toFixed(2)+'%'} · ${won(a.amount)}</div>`;
+    el.onclick=()=>showHistoryAsset(i);
+    historyAssetLegend.appendChild(el);
+  });
+
+  historyAssetInfo.innerHTML='<div class="asset-info-title">자산을 눌러보세요</div><div class="asset-info-sub">선택한 날짜의 자산 금액과 비중이 표시됩니다.</div>';
+}
+
+function showHistoryAsset(i){
+  const a=historyCompositionData[i];
+  if(!a || !historyDonut) return;
+  document.querySelectorAll('.history-legend-item').forEach(e=>e.classList.remove('selected'));
+  const selected=document.getElementById('history-legend-'+i);
+  if(selected) selected.classList.add('selected');
+  historyDonut.data.datasets[0].offset=historyCompositionData.map((_,idx)=>idx===i?14:0);
+  historyDonut.update();
+  const total=historyCompositionData.reduce((s,x)=>s+x.amount,0);
+  const pct=total ? a.amount/total*100 : 0;
+  historyAssetInfo.innerHTML=`<div class="asset-info-title">${escapeHtml(a.name)} · ${won(a.amount)}</div><div class="asset-info-sub">${showcaseMode?'비중 비공개':'비중 '+pct.toFixed(2)+'%'}</div>`;
+}
+
+const initialAllocationTotal=assetData.reduce((sum,a)=>sum+a[1],0);
+assetData.forEach(a=>a[2]=(initialAllocationTotal?((a[1]/initialAllocationTotal)*100):0).toFixed(2)+'%');
+let selectedHomeAsset=-1;
+const donut=new Chart(donutChart,{type:'doughnut',data:{labels:assetData.map(x=>x[0]),datasets:[{data:assetData.map(x=>x[1]),backgroundColor:colors,borderWidth:3,borderColor:'#fff',offset:assetData.map(()=>0)}]},options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:chartTooltipAmount}}},onClick:(e,els)=>{if(els.length)showAsset(els[0].index)}}});
+function renderHomeLegend(){
+  assetLegend.innerHTML='';
+  assetData.forEach((a,i)=>{
+    const el=document.createElement('div');el.className='legend-item'+(selectedHomeAsset===i?' selected':'');el.id='legend-'+i;
+    el.innerHTML=`<div class="legend-top"><span class="dot" style="background:${colors[i%colors.length]}"></span>${escapeHtml(a[0])}</div><div class="legend-money">${showcaseMode?'비중 비공개':a[2]} · ${won(a[1])}</div>`;
+    el.onclick=()=>showAsset(i);assetLegend.appendChild(el);
+  });
+  if(selectedHomeAsset>=0){
+    const a=assetData[selectedHomeAsset];
+    assetInfo.innerHTML=`<div class="asset-info-title">${escapeHtml(a[0])} · ${won(a[1])}</div><div class="asset-info-sub">${showcaseMode?'비중 비공개':'비중 '+a[2]}</div>`;
+  }
+}
+function showAsset(i){selectedHomeAsset=i;document.querySelectorAll('#assetLegend .legend-item').forEach(e=>e.classList.remove('selected'));const selected=document.getElementById('legend-'+i);if(selected)selected.classList.add('selected');donut.data.datasets[0].offset=assetData.map((_,idx)=>idx===i?14:0);donut.update();let a=assetData[i];assetInfo.innerHTML=`<div class="asset-info-title">${escapeHtml(a[0])} · ${won(a[1])}</div><div class="asset-info-sub">${showcaseMode?'비중 비공개':'비중 '+a[2]}</div>`}
+document.getElementById('homeTotalKrw').textContent=won(0);
+document.getElementById('homeTotalUsd').textContent=usd(0);
+document.getElementById('homeDonutTotal').textContent=compactWon(0);
+renderHomeLegend();
+hideInitialHomeLoading();
+
+const SHOWCASE_HISTORY=[['2024-01-01',1,1],['2024-07-01',1.25,1.2],['2025-01-01',1.55,1.45],['2025-07-01',1.8,1.7],['2026-01-01',2.1,2]];
+const day=86400000;
+let raw=SHOWCASE_HISTORY.map(r=>[...r]);
+let start=new Date(raw[0][0]).getTime();
+let hist=raw.map(r=>({date:r[0],x:(new Date(r[0]).getTime()-start)/day,krw:r[1],usd:r[2]}));
+let xMax=hist[hist.length-1].x+45;
+let yearTicks=[];
+let yearBands=[];
+
+function rebuildHistoryGeometry(rows){
+  raw=(rows||[]).map(row=>[String(row.record_date||row[0]),Number(row.total_krw??row[1]),Number(row.total_usd??row[2])]).filter(r=>r[0]&&Number.isFinite(r[1])&&Number.isFinite(r[2])&&r[1]>0&&r[2]>0);
+  if(!raw.length) raw=SHOWCASE_HISTORY.map(r=>[...r]);
+  raw.sort((a,b)=>a[0].localeCompare(b[0]));
+  start=new Date(raw[0][0]).getTime();
+  hist=raw.map(r=>({date:r[0],x:(new Date(r[0]).getTime()-start)/day,krw:r[1],usd:r[2]}));
+  xMax=hist[hist.length-1].x+45;
+  const years=[...new Set(hist.map(h=>new Date(h.date).getFullYear()))];
+  yearTicks=years.map(y=>({x:(new Date(y+'-01-01').getTime()-start)/day,label:y+'년'}));
+  const bandColors=['rgba(37,99,235,.09)','rgba(16,185,129,.10)','rgba(245,158,11,.12)','rgba(139,92,246,.11)'];
+  yearBands=years.map((y,i)=>[y+'-01-01',(y+1)+'-01-01',bandColors[i%bandColors.length]]);
+}
+rebuildHistoryGeometry(raw);
+
+function expTrend(data,key){
+  const points=data.filter(p=>Number(p[key])>0);
+  if(points.length<2) return points.map(p=>({x:p.x,y:p[key]}));
+  let n=points.length,sx=0,sy=0,sxx=0,sxy=0;
+  points.forEach(p=>{let x=p.x,y=Math.log(p[key]);sx+=x;sy+=y;sxx+=x*x;sxy+=x*y});
+  const denominator=n*sxx-sx*sx;
+  if(!denominator) return points.map(p=>({x:p.x,y:p[key]}));
+  let b=(n*sxy-sx*sy)/denominator,a=(sy-b*sx)/n;
+  return points.map(p=>({x:p.x,y:Math.exp(a+b*p.x)}));
+}
+let trendKrw=expTrend(hist,'krw'),trendUsd=expTrend(hist,'usd');
+
+const bands={id:'bands',beforeDatasetsDraw(chart){const{ctx,chartArea,scales}=chart;if(!chartArea)return;yearBands.forEach(b=>{let l=scales.x.getPixelForValue((new Date(b[0]).getTime()-start)/day),r=scales.x.getPixelForValue((new Date(b[1]).getTime()-start)/day);ctx.save();ctx.fillStyle=b[2];ctx.fillRect(l,chartArea.top,r-l,chartArea.bottom-chartArea.top);ctx.restore()})}};
+
+let currentMode='krwLinear',selectedIndex=hist.length-1;
+function cfg(m){let isUsd=m.includes('usd'),isLog=m.includes('Log');return{key:isUsd?'usd':'krw',label:isUsd?'USD 순자산':'KRW 순자산',type:isLog?'logarithmic':'linear'}}
+function trendFor(key){return key==='usd'?trendUsd:trendKrw}
+function historyTickLabel(v,key){if(showcaseMode)return '';return key==='usd'?'$'+Math.round(v/1000)+'K':Math.round(v/100000000)+'억'}
+
+
+const assetCompositionArea={
+  id:'assetCompositionArea',
+  beforeDatasetsDraw(chart){
+    if(cfg(currentMode).type==='logarithmic') return;
+    if(!historyCompositionReady || !historyCompositionDates.length) return;
+    const {ctx,chartArea,scales}=chart;
+    const xScale=scales.x, yScale=scales.y;
+    if(!chartArea || !xScale || !yScale) return;
+
+    const modeKey=cfg(currentMode).key;
+    const points=hist.map((h,i)=>{
+      let compositionDate=historyCompositionByDate.has(h.date) ? h.date :
+        (historyCompositionDates.length===hist.length ? historyCompositionDates[i] : null);
+
+      if(!compositionDate){
+        const target=new Date(h.date).getTime();
+        compositionDate=historyCompositionDates.reduce((best,d)=>{
+          if(!best) return d;
+          return Math.abs(new Date(d).getTime()-target) < Math.abs(new Date(best).getTime()-target) ? d : best;
+        },null);
+      }
+
+      const rows=compositionDate ? historyCompositionByDate.get(compositionDate) : null;
+      if(!rows) return null;
+
+      let house=0, gold=0, liabilities=0, assets=0;
+      rows.forEach(r=>{
+        const amount=Number(r.amount)||0;
+        if(r.type==='liability'){ liabilities+=Math.abs(amount); return; }
+        assets+=amount;
+        if(r.name==='주택') house+=amount;
+        else if(r.name==='금') gold+=amount;
+      });
+
+      house=Math.max(0,house-liabilities);
+      const netTotal=Math.max(0,assets-liabilities);
+      const finance=Math.max(0,netTotal-house-gold);
+
+      let divisor=1;
+      if(modeKey==='usd'){
+        divisor=h.usd ? h.krw/h.usd : 1;
+      }
+
+      return {
+        x:h.x,
+        house:house/divisor,
+        gold:gold/divisor,
+        finance:finance/divisor
+      };
+    }).filter(Boolean);
+
+    if(points.length<2) return;
+
+    const baselineValue = yScale.type==='logarithmic'
+      ? Math.max(Number(yScale.min)||1, 1)
+      : 0;
+
+    const layers=[
+      {lower:p=>baselineValue, upper:p=>p.house, fill:'rgba(16,185,129,.20)'},
+      {lower:p=>p.house, upper:p=>p.house+p.gold, fill:'rgba(245,183,0,.22)'},
+      {lower:p=>p.house+p.gold, upper:p=>p.house+p.gold+p.finance, fill:'rgba(139,92,246,.18)'}
+    ];
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(chartArea.left,chartArea.top,chartArea.right-chartArea.left,chartArea.bottom-chartArea.top);
+    ctx.clip();
+
+    layers.forEach(layer=>{
+      ctx.beginPath();
+      points.forEach((p,i)=>{
+        const x=xScale.getPixelForValue(p.x);
+        const y=yScale.getPixelForValue(Math.max(layer.upper(p),baselineValue));
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      for(let i=points.length-1;i>=0;i--){
+        const p=points[i];
+        const x=xScale.getPixelForValue(p.x);
+        const y=yScale.getPixelForValue(Math.max(layer.lower(p),baselineValue));
+        ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.fillStyle=layer.fill;
+      ctx.fill();
+    });
+
+    ctx.restore();
+  }
+};
+
+const selectedGuide={id:'selectedGuide',afterDatasetsDraw(chart){if(selectedIndex<0)return;const{ctx,chartArea,scales}=chart;let p=hist[selectedIndex],c=cfg(currentMode);let x=scales.x.getPixelForValue(p.x),y=scales.y.getPixelForValue(p[c.key]);ctx.save();ctx.strokeStyle='rgba(15,98,254,.45)';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(x,chartArea.top);ctx.lineTo(x,chartArea.bottom);ctx.stroke();ctx.setLineDash([]);ctx.shadowColor='rgba(15,98,254,.55)';ctx.shadowBlur=16;ctx.fillStyle='rgba(15,98,254,.20)';ctx.beginPath();ctx.arc(x,y,17,0,Math.PI*2);ctx.fill();ctx.shadowBlur=10;ctx.fillStyle='#0f62fe';ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x,y,9.5,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();ctx.restore()}};
+
+const hc=new Chart(historyChart,{type:'line',data:{datasets:[{label:'KRW 순자산',data:hist.map(d=>({x:d.x,y:d.krw})),borderColor:'#2563EB',backgroundColor:'#2563EB',borderWidth:3,pointRadius:4,pointHoverRadius:7,tension:.25,order:1},{label:'지수 추세선',data:trendKrw,borderColor:'rgba(17,24,39,.45)',backgroundColor:'rgba(17,24,39,.45)',borderWidth:2,pointRadius:0,borderDash:[7,5],tension:.2,order:2}]},plugins:[assetCompositionArea,bands,selectedGuide],options:{maintainAspectRatio:false,animation:{duration:500},parsing:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{type:'linear',min:-10,max:xMax,grid:{color:'rgba(148,163,184,.18)'},ticks:{autoSkip:false,maxRotation:0,callback:v=>{if(showcaseMode)return '';let t=yearTicks.find(a=>Math.abs(a.x-v)<20);return t?t.label:''},stepSize:365}},y:{type:'linear',min:0,grid:{color:'rgba(148,163,184,.18)'},ticks:{callback:v=>historyTickLabel(v,'krw')}}},onClick:(e,els)=>{if(!els.length)return;selectedIndex=els[0].index;showPoint(selectedIndex)}}});
+
+function applyHistoryRows(rows){
+  rebuildHistoryGeometry(rows);
+  trendKrw=expTrend(hist,'krw');trendUsd=expTrend(hist,'usd');
+  selectedIndex=Math.max(0,hist.length-1);
+  const c=cfg(currentMode);
+  hc.data.datasets[0].data=hist.map(d=>({x:d.x,y:d[c.key]}));
+  hc.data.datasets[1].data=trendFor(c.key);
+  hc.options.scales.x.max=xMax;
+  hc.update();showPoint(selectedIndex);
+}
+function showPoint(i){if(!hist.length)return;selectedIndex=Math.max(0,Math.min(hist.length-1,i));let p=hist[selectedIndex],prev=hist[selectedIndex-1],c=cfg(currentMode),change=prev?p[c.key]-prev[c.key]:0;let changeValue=c.key==='usd'?usd(Math.abs(change)):won(Math.abs(change));let changeText=showcaseMode?(prev?'변동 금액 비공개':'첫 데이터'):(prev?((change>=0?'+':'-')+changeValue+' 이전 데이터 대비'):'첫 데이터');let dateText=showcaseMode?'기록 비공개':p.date;infoBody.innerHTML=`<div class="info-date">${escapeHtml(dateText)}</div><div class="info-main">${won(p.krw)}</div><div class="info-sub">${usd(p.usd)}</div><div class="info-extra">${escapeHtml(changeText)}</div>`;hc.update();renderHistoryComposition(p.date)}
+function movePoint(delta){showPoint(selectedIndex+delta)}
+function setMode(m,btn){currentMode=m;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');let c=cfg(m);hc.data.datasets[0].label=c.label;hc.data.datasets[0].data=hist.map(d=>({x:d.x,y:d[c.key]}));hc.data.datasets[0].borderColor=c.key==='usd'?'#14B8A6':'#2563EB';hc.data.datasets[0].backgroundColor=c.key==='usd'?'#14B8A6':'#2563EB';hc.data.datasets[1].data=trendFor(c.key);hc.options.scales.y.type=c.type;if(c.type==='linear'){hc.options.scales.y.min=0}else{delete hc.options.scales.y.min}hc.options.scales.y.ticks.callback=v=>historyTickLabel(v,c.key);hc.update();showPoint(selectedIndex)}
+showPoint(selectedIndex);
+
+function applyAssetConfiguration(configRows,marketRows){
+  const marketByKey=new Map((marketRows||[]).map(row=>[String(row.price_key||''),row]));
+  settingsPrices={};HOME_ASSET_CATEGORY={};HOME_DIRECT_VALUE_ASSETS={};HOME_REPLACE_QUANTITY_ASSETS={};HOME_HOUSE_ASSET='';HOME_LOAN_ASSET='';
+  (configRows||[]).forEach(row=>{
+    const name=String(row.asset_name||'').trim();
+    if(!name) return;
+    const market=marketByKey.get(String(row.price_key||''));
+    const directValue=Boolean(row.direct_value);
+    const fixedPrice=Number(row.fixed_price);
+    const price=Number(market?.price)||(Number.isFinite(fixedPrice)&&fixedPrice>0?fixedPrice:(directValue?1:0));
+    settingsPrices[name]={
+      currency:String(row.currency||market?.quote_currency||'KRW'),price,unit:String(row.unit||''),
+      directValue,liability:Boolean(row.liability),referencePrice:Boolean(row.reference_price),
+      priceDate:market?.price_date||null
+    };
+    const category=String(row.home_category||'').trim();
+    const mode=String(row.home_mode||'').trim();
+    if(category&&mode==='delta') HOME_ASSET_CATEGORY[name]=category;
+    if(category&&mode==='direct') HOME_DIRECT_VALUE_ASSETS[name]=category;
+    if(category&&mode==='replace') HOME_REPLACE_QUANTITY_ASSETS[name]=category;
+    if(row.special_role==='house') HOME_HOUSE_ASSET=name;
+    if(row.special_role==='loan') HOME_LOAN_ASSET=name;
+  });
+}
+
+async function fetchAppData(passcode){
+  const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${APP_DATA_RPC}`,{
+    method:'POST',headers:settingsHeaders(true),body:JSON.stringify({p_password:passcode})
+  });
+  if(!response.ok) throw new Error(await response.text()||`HTTP ${response.status}`);
+  const payload=await response.json();
+  if(!payload||typeof payload!=='object') throw new Error('Supabase 응답 형식이 올바르지 않습니다.');
+  return payload;
+}
+
+function applyAppData(payload){
+  const dashboard=payload.dashboard||{};
+  const assets=Array.isArray(dashboard.assets)?dashboard.assets:[];
+  if(!assets.length) throw new Error('대시보드 자산 데이터가 없습니다.');
+  HOME_BASE_TOTAL_KRW=Number(dashboard.total_krw)||0;
+  HOME_BASE_TOTAL_USD=Number(dashboard.total_usd)||0;
+  HOME_BASE_ASSETS=assets.map(row=>[String(row.asset_name||''),Number(row.amount_krw)||0]);
+  HOME_BASE_ASSET_MAP=Object.fromEntries(HOME_BASE_ASSETS);
+  assetData=HOME_BASE_ASSETS.map(([name,value])=>[name,value,'0.00%']);
+  settingsFx=Math.max(1,Number(payload.fx_rate)||1);
+  applyAssetConfiguration(payload.asset_config,payload.market_prices);
+  settingsData=rowsToSettingsData(Array.isArray(payload.holdings)?payload.holdings:[]);
+  settingsInitialData=settingsClone(settingsData);
+  HOME_BASE_QUANTITIES=aggregateQuantitiesFromSettingsData(settingsData);
+  settingsSelectedOwner=settingsOwnerOrder[0]||'';
+  applyHistoryRows(Array.isArray(payload.history)?payload.history:[]);
+  applyHistoryCompositionRows(Array.isArray(payload.composition_history)?payload.composition_history:[]);
+  donut.data.labels=assetData.map(x=>x[0]);
+  donut.data.datasets[0].data=assetData.map(x=>x[1]);
+  donut.data.datasets[0].backgroundColor=assetData.map((_,i)=>colors[i%colors.length]);
+  donut.data.datasets[0].offset=assetData.map(()=>0);
+  selectedHomeAsset=-1;
+  appDataLoaded=true;settingsLoaded=true;homeDashboardLoaded=false;
+  applyHomeQuantities(HOME_BASE_QUANTITIES,'Supabase 보안 데이터 반영됨');
+  renderMemberTabs();renderSettings();
+}
+
+function clearSensitiveData(){
+  appDataLoaded=false;homeDashboardLoaded=false;settingsLoaded=false;settingsUnlocked=false;settingsSessionPin='';
+  HOME_BASE_TOTAL_KRW=0;HOME_BASE_TOTAL_USD=0;
+  HOME_BASE_ASSETS=SHOWCASE_ASSETS.map(([name,value])=>[name,value]);
+  HOME_BASE_ASSET_MAP=Object.fromEntries(HOME_BASE_ASSETS);
+  HOME_BASE_QUANTITIES={};settingsPrices={};settingsInitialData={};settingsData={};settingsOwnerOrder=[];settingsSelectedOwner='';
+  assetData=HOME_BASE_ASSETS.map(([name,value])=>[name,value,'비중 비공개']);
+  donut.data.labels=assetData.map(x=>x[0]);donut.data.datasets[0].data=assetData.map(x=>x[1]);donut.data.datasets[0].backgroundColor=colors;donut.data.datasets[0].offset=assetData.map(()=>0);donut.update();
+  applyHistoryRows(SHOWCASE_HISTORY);applyHistoryCompositionRows([]);
+  if(historyDonut){historyDonut.destroy();historyDonut=null}
+  historyCompositionData=[];historyAssetLegend.innerHTML='';historyDonutTotal.textContent='비공개';historyDonutDate.textContent='HISTORY';
+  historyCompositionSub.textContent='공개모드에서 실제 기록을 불러옵니다.';
+  historyAssetInfo.innerHTML='<div class="asset-info-title">자산을 눌러보세요</div><div class="asset-info-sub">금액과 비중은 공개모드에서만 불러옵니다.</div>';
+  document.getElementById('homeTotalKrw').textContent=won(0);document.getElementById('homeTotalUsd').textContent=usd(0);document.getElementById('homeDonutTotal').textContent=compactWon(0);
+  selectedHomeAsset=-1;assetInfo.innerHTML='<div class="asset-info-title">자산을 눌러보세요</div><div class="asset-info-sub">금액과 비중은 공개모드에서만 불러옵니다.</div>';
+  renderHomeLegend();renderMemberTabs();renderSettings();
+}
+
+let page=0;
+const homePage=document.getElementById('homePage');
+const historyPage=document.getElementById('historyPage');
+const settingsPage=document.getElementById('settingsPage');
+const homeNav=document.getElementById('homeNav');
+const historyNav=document.getElementById('historyNav');
+const settingsNav=document.getElementById('settingsNav');
+
+function showPage(n,force=false){
+  const target=Math.max(0,Math.min(2,Number(n)||0));
+  if(target===2&&showcaseMode){showToast('자랑모드에서는 Settings가 잠깁니다');return}
+  if(target===2&&!settingsUnlocked&&!force){requestSettingsUnlock(page);return}
+  page=target;
+  homePage.classList.toggle('active',page===0);
+  historyPage.classList.toggle('active',page===1);
+  settingsPage.classList.toggle('active',page===2);
+  homeNav.classList.toggle('active',page===0);
+  historyNav.classList.toggle('active',page===1);
+  settingsNav.classList.toggle('active',page===2);
+  settingsFooterActions.classList.toggle('show',page===2&&settingsUnlocked);
+  window.scrollTo(0,0);
+  if(page===0&&!force) loadDashboardHoldings();
+  if(page===1) requestAnimationFrame(()=>hc.resize());
+  if(page===2&&settingsUnlocked&&!settingsLoaded&&!force) loadSettingsHoldings();
+}
+window.showPage=showPage;
+showPage(0,true);
+
+function syncShowcaseControls(){
+  document.body.classList.toggle('showcase-mode',showcaseMode);
+  document.querySelectorAll('.showcase-toggle').forEach(btn=>{
+    btn.classList.toggle('active',showcaseMode);
+    btn.setAttribute('aria-checked',String(showcaseMode));
+    btn.setAttribute('aria-label',showcaseMode?'자랑모드 끄기':'자랑모드 켜기');
+  });
+  settingsNav.classList.toggle('showcase-disabled',showcaseMode);
+  settingsNav.setAttribute('aria-disabled',String(showcaseMode));
+}
+function refreshShowcaseDisplays(){
+  syncShowcaseControls();
+  if(homeDashboardLoaded&&Number.isFinite(homeCurrentTotalKrw)&&Number.isFinite(homeCurrentTotalUsd)){
+    document.getElementById('homeTotalKrw').textContent=won(homeCurrentTotalKrw);
+    document.getElementById('homeTotalUsd').textContent=usd(homeCurrentTotalUsd);
+    document.getElementById('homeDonutTotal').textContent=compactWon(homeCurrentTotalKrw);
+  }else{
+    document.getElementById('homeTotalKrw').textContent=won(0);
+    document.getElementById('homeTotalUsd').textContent=usd(0);
+    document.getElementById('homeDonutTotal').textContent=compactWon(0);
+  }
+  renderHomeLegend();
+  donut.update();
+  hc.options.scales.y.ticks.callback=v=>historyTickLabel(v,cfg(currentMode).key);
+  showPoint(selectedIndex);
+}
+function setShowcaseMode(next){
+  showcaseMode=Boolean(next);
+  if(showcaseMode) clearSensitiveData();
+  if(showcaseMode&&page===2){
+    settingsUnlocked=false;settingsSessionPin='';
+    lockScreen.classList.remove('show');document.body.style.overflow='';
+    showPage(0,true);
+  }
+  refreshShowcaseDisplays();
+  showToast(showcaseMode?'자랑모드 ON · 자산 금액을 숨겼습니다':'자랑모드 OFF · 실제 금액을 표시합니다');
+}
+const publicModeLock=document.getElementById('publicModeLock');
+const publicModePassword=document.getElementById('publicModePassword');
+const publicModeError=document.getElementById('publicModeError');
+function openPublicModeLock(){
+  publicModePassword.value='';
+  publicModeError.classList.remove('show');
+  publicModeLock.classList.add('show');
+  document.body.style.overflow='hidden';
+  requestAnimationFrame(()=>publicModePassword.focus());
+}
+function closePublicModeLock(){
+  publicModeLock.classList.remove('show');
+  publicModePassword.value='';
+  publicModeError.classList.remove('show');
+  document.body.style.overflow='';
+}
+async function unlockPublicMode(){
+  const passcode=publicModePassword.value;
+  if(passcode.length!==8){publicModeError.textContent='8자리 비밀번호를 입력해 주세요.';publicModeError.classList.add('show');publicModePassword.focus();return}
+  const button=document.getElementById('publicModeUnlockBtn');
+  button.disabled=true;button.textContent='확인 중';publicModeError.classList.remove('show');
+  try{
+    const payload=await fetchAppData(passcode);
+    applyAppData(payload);
+    closePublicModeLock();
+    setShowcaseMode(false);
+  }catch(error){
+    console.error('Public mode unlock failed:',error);
+    publicModeError.textContent='비밀번호가 올바르지 않거나 잠시 잠겼습니다.';
+    publicModeError.classList.add('show');publicModePassword.select();
+  }finally{button.disabled=false;button.textContent='공개하기'}
+}
+document.querySelectorAll('.showcase-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+  if(showcaseMode)openPublicModeLock();
+  else setShowcaseMode(true);
+}));
+document.getElementById('publicModeUnlockBtn').addEventListener('click',unlockPublicMode);
+document.getElementById('publicModeCancelBtn').addEventListener('click',closePublicModeLock);
+publicModePassword.addEventListener('input',()=>{publicModePassword.value=publicModePassword.value.replace(/\D/g,'').slice(0,8);publicModeError.classList.remove('show')});
+publicModePassword.addEventListener('keydown',e=>{
+  if(e.key==='Enter')unlockPublicMode();
+  if(e.key==='Escape')closePublicModeLock();
+});
+syncShowcaseControls();
+</script>
+</body>
+</html>
