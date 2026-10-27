@@ -3,7 +3,7 @@ create table vr_private.daily_prices (
  symbol text not null check(symbol in ('TQQQ','SPY')), price_date date not null,
  close numeric not null check(close>0), source text not null,
  is_market_close boolean not null default false, has_conflict boolean not null default false,
- incoming_close numeric, collected_at timestamptz not null default now(),
+ incoming_close numeric, verification jsonb, collected_at timestamptz not null default now(),
  primary key(symbol,price_date)
 );
 create table vr_private.price_splits (
