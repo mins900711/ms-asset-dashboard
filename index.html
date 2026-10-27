@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MS_v5_6_5</title>
+<title>MS_v5_6_6</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{--bg:#f3f6fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--soft:#eaf1ff;--shadow:0 12px 30px rgba(15,23,42,.08)}
@@ -32,7 +32,7 @@ body{overflow-x:hidden}
 @supports(padding:max(0px)){.page{padding-bottom:max(78px,calc(66px + env(safe-area-inset-bottom)))}}
 @media(min-width:760px){.page{padding:28px 26px 98px}.tabs{grid-template-columns:repeat(4,1fr)}.krw{font-size:42px}}
 
-/* V5.6.5 Settings */
+/* V5.6.6 Settings */
 #settingsPage{padding-bottom:170px}
 .lock-mini{width:34px;height:34px;border:0;border-radius:11px;background:#fff;color:#374151;box-shadow:0 8px 20px rgba(15,23,42,.08);font-size:15px;cursor:pointer}
 .member-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -112,7 +112,7 @@ body{overflow-x:hidden}
 </div>
 <div class="pages" id="pages">
 <section class="page active" id="homePage"><div class="inner">
-<div class="header"><div class="brand">MS Project</div><div class="header-actions"><button class="showcase-toggle" type="button" role="switch" aria-checked="false"><span class="showcase-option mode-public">공개모드</span><span class="showcase-divider">|</span><span class="showcase-option mode-internal">내부모드</span></button><div class="badge">v5.6.5</div></div></div>
+<div class="header"><div class="brand">MS Project</div><div class="header-actions"><button class="showcase-toggle" type="button" role="switch" aria-checked="false"><span class="showcase-option mode-public">공개모드</span><span class="showcase-divider">|</span><span class="showcase-option mode-internal">내부모드</span></button><div class="badge">v5.6.6</div></div></div>
 <div class="card total"><div class="label">총 순자산</div><div class="krw" id="homeTotalKrw">—</div><div class="usd" id="homeTotalUsd">—</div><div class="home-sync loading" id="homeSyncStatus">Supabase 보유 수량을 확인하는 중입니다.</div></div>
 <div class="card">
 <div class="label">전체 자산 배분</div>
@@ -883,8 +883,8 @@ function renderSettings(){
   }
   settingsAccountsForDisplay(person).forEach(({account,sourceIndex:accountIndex})=>{
     const card=document.createElement('section');
-    card.className='card account-card';
-    card.innerHTML='<button class="account-head" type="button" aria-expanded="true"><span class="account-head-left"><span class="account-name">'+escapeHtml(account.name)+'</span><span class="account-meta">'+escapeHtml(account.type)+' · '+account.assets.length+'개 자산</span></span><span class="account-head-right"><span class="account-total">'+actualWon(settingsAccountValue(account))+'</span><span class="chev">⌄</span></span></button><div class="asset-list"></div>';
+    card.className='card account-card collapsed';
+    card.innerHTML='<button class="account-head" type="button" aria-expanded="false"><span class="account-head-left"><span class="account-name">'+escapeHtml(account.name)+'</span><span class="account-meta">'+escapeHtml(account.type)+' · '+account.assets.length+'개 자산</span></span><span class="account-head-right"><span class="account-total">'+actualWon(settingsAccountValue(account))+'</span><span class="chev">⌄</span></span></button><div class="asset-list"></div>';
     const list=card.querySelector('.asset-list');
     account.assets.forEach((asset,assetIndex)=>{
       const name=asset[0];
