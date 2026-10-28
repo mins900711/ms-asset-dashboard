@@ -170,13 +170,6 @@ body{overflow-x:hidden}
     </div>
     <div class="sync-note loading" id="settingsSyncNote"><span class="sync-dot"></span><span id="settingsSyncText">Supabase 연결 대기 중입니다.</span></div>
   </div>
-  <section class="card backup-card" aria-labelledby="assetBackupHeading">
-    <h2 id="assetBackupHeading">기록 백업·복원</h2>
-    <p class="backup-help">계좌별 보유자산, History, 날짜별 자산구성을 JSON 파일로 보관합니다. 서버에 저장된 기록을 백업하므로 수정 중인 내용은 먼저 저장해 주세요.</p>
-    <div class="backup-actions"><button class="backup-button primary" id="assetBackupBtn" type="button" disabled>JSON 백업 내려받기</button><button class="backup-button" id="assetRestoreBtn" type="button" disabled>백업 파일 가져오기</button></div>
-    <div class="backup-status" id="assetBackupStatus" role="status">비밀번호는 파일에 포함되지 않습니다. 계좌 내역이 담긴 개인용 백업 파일입니다.</div>
-    <input id="assetRestoreFile" type="file" accept=".json,application/json" hidden aria-label="자산관리 JSON 백업 파일">
-  </section>
   <div class="section-head"><div class="section-title">계좌별 보유자산</div><div class="section-sub" id="accountCount">0개 계좌</div></div>
   <div id="accountList"><div class="card empty">Settings 잠금을 해제하면 데이터를 불러옵니다.</div></div>
   <div class="section-head"><div class="section-title">보안 설정</div><div class="section-sub">8자리 숫자 · 각각 별도 저장</div></div>
@@ -203,6 +196,13 @@ body{overflow-x:hidden}
     </div>
     <div class="security-status" id="securityStatus">두 비밀번호는 각각 독립적으로 변경됩니다.</div>
   </div>
+  <section class="card backup-card" aria-labelledby="assetBackupHeading">
+    <h2 id="assetBackupHeading">기록 백업·복원</h2>
+    <p class="backup-help">계좌별 보유자산, History, 날짜별 자산구성을 JSON 파일로 보관합니다. 서버에 저장된 기록을 백업하므로 수정 중인 내용은 먼저 저장해 주세요.</p>
+    <div class="backup-actions"><button class="backup-button primary" id="assetBackupBtn" type="button" disabled>JSON 백업 내려받기</button><button class="backup-button" id="assetRestoreBtn" type="button" disabled>백업 파일 가져오기</button></div>
+    <div class="backup-status" id="assetBackupStatus" role="status">비밀번호는 파일에 포함되지 않습니다. 계좌 내역이 담긴 개인용 백업 파일입니다.</div>
+    <input id="assetRestoreFile" type="file" accept=".json,application/json" hidden aria-label="자산관리 JSON 백업 파일">
+  </section>
 </div></section>
 
 </div>
