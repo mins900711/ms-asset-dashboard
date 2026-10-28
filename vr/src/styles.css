@@ -6,3 +6,5 @@
 .price-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#edf4ef;border:1px solid #dce9df;border-radius:12px;padding:13px 16px;margin-bottom:18px;font-size:11px;line-height:1.8;color:#536e60}.price-summary>span{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.price-summary button{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;color:var(--teal)}@media(max-width:620px){.bottom-nav{grid-template-columns:repeat(5,1fr)}.price-summary{padding:10px 12px;font-size:10px}.price-summary>span{display:block}.price-summary>span>.icon{display:none}.price-summary button{font-size:9px}}
 
 .chart.price-chart{height:auto;max-height:270px;display:block;margin:14px 0 18px}.price-chart text{font-size:15px}
+
+.numeric-password{-webkit-text-security:disc;text-security:disc}
