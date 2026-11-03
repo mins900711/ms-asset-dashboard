@@ -59,8 +59,8 @@ function complete(state,id,draft,clock=today()){
  const p=orderPlan(state,id);
  if(Math.abs(draft.quantity)>Math.abs(p.quantity))throw Error('실제 수량이 계산 수량을 초과합니다. 기준 잔고를 확인해 주세요.');
  if(Math.sign(draft.quantity)!==Math.sign(p.quantity)&&draft.quantity!==0)throw Error('계산된 매수·매도 방향과 실제 거래 방향이 다릅니다.');
- // Excel F(next) uses the closing period's ending Pool, before the new row's deposit.
- const vBasisPool=Math.max(0,draft.rp-500);
+ // The observed final RP is the next Pool, including this cycle's completed deposit.
+ const vBasisPool=draft.rp;
  const record={id:id+'-'+date,account:id,cycleDate:date,asOf:date,v:nextV(prev.v,vBasisPool,500),orderV:p.v,vBasisPool,holdings:prev.holdings+draft.quantity,pool:draft.rp,price:state.quote.price,principal:prev.principal+500,quantity:draft.quantity,contribution:500,source:'web',rpMaturity:addDays(date,14),quoteDate:state.quote.date,createdAt:new Date().toISOString()};
  record.assets=record.holdings*record.price+record.pool;
  // RP is the observed ending balance. Execution price, fees and interest cannot be separated from two inputs.
