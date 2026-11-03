@@ -51,6 +51,15 @@ class FundedCheckpointTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.checkpoint(as_of='2026-10-19')
 
+    def test_later_prefilled_deposit_does_not_change_the_closing_checkpoint(self):
+        rows = copy.deepcopy(self.rows)
+        rows[0]['cells'].update({'N5': 2500, 'O5': 1900})
+        rows.append(row(11, B='N', D=serial('2026-11-03'), E=serial('2026-11-16'), F=2233.1, I=10, J=110, O=500, P=1900))
+        result = self.checkpoint(rows=rows, as_of='2026-11-02')
+        self.assertEqual(result['principal'], 2000)
+        self.assertEqual(result['v'], 1590)
+        self.assertEqual(result['pool'], 1400)
+
     def test_current_header_reconciliation_catches_missing_deposit(self):
         bad = copy.deepcopy(self.rows)
         bad[0]['cells']['N5'] = 1500

@@ -11,12 +11,12 @@ function nextV(v,pool,contribution=500,g=10){if(!finite(v)||v<=0||!finite(pool)|
 function plan({v,holdings,pool,price,contribution=500,band=.2,usage=.75}){
  if(![v,holdings,pool,price,contribution,band,usage].every(finite)||v<=0||price<=0||holdings<0||!Number.isInteger(holdings)||pool<0||contribution<0||band<=0||band>=1||usage<0||usage>1)throw Error('계산 입력값을 확인해 주세요.');
  const low=v*(1-band),high=v*(1+band),stock=holdings*price;
- // The contribution is exchanged AFTER the stock order. Never spend unfunded dollars.
- const excelBudget=floor((pool+contribution)*usage,2),budget=Math.max(0,Math.min(pool,excelBudget));
+ // Pool already contains the preceding funded period's deposit. Today's deposit follows the order.
+ const excelBudget=floor(pool*usage,2),budget=excelBudget;
  let quantity=0;
  if(stock>high+1e-8)quantity=-Math.min(holdings,Math.floor((stock-high)/price+1e-10)+1);
  else if(stock<low-1e-8){const needed=Math.ceil((low-stock)/price-1e-10),excelAmount=floor(Math.min(excelBudget,needed*price),2);if(excelAmount>price+1e-9)quantity=Math.min(Math.floor((excelAmount+1e-9)/price),Math.floor((pool+1e-9)/price));}
- return {v,low,high,stock,budget,quantity,amount:round(Math.abs(quantity)*price),limited:quantity>=0&&stock<low&&budget<Math.ceil((low-stock)/price-1e-10)*price,action:quantity>0?'매수':quantity<0?'매도':'유지',reserve:round((pool+contribution)*(1-usage))};
+ return {v,low,high,stock,budget,quantity,amount:round(Math.abs(quantity)*price),limited:quantity>=0&&stock<low&&budget<Math.ceil((low-stock)/price-1e-10)*price,action:quantity>0?'매수':quantity<0?'매도':'유지',reserve:round(pool*(1-usage)+contribution)};
 }
 // Exact cached workbook M-column expression, including transactions already entered.
 function excelRemaining({v,holdings,pool,price,contribution,amount,prevPool,first=false}){
@@ -30,6 +30,7 @@ function excelRemaining({v,holdings,pool,price,contribution,amount,prevPool,firs
 }
 function currentAccount(state,id){const a=state.accounts[id];if(!a)throw Error('계좌를 찾을 수 없습니다.');const records=state.records.filter(r=>r.account===id).sort((a,b)=>a.cycleDate.localeCompare(b.cycleDate));return records.length?records[records.length-1]:a.baseline;}
 function cycleFor(state,id){return addDays(currentAccount(state,id).cycleDate,14);}
+function orderPlan(state,id){const a=currentAccount(state,id);return plan({v:a.v,holdings:a.holdings,pool:a.pool,price:state.quote.price,contribution:state.settings.contribution});}
 function quoteValid(state,date){const q=state.quote;return !!q&&finite(q.price)&&q.price>0&&q.confirmed&&q.date===addDays(date,-1);}
 function canTrade(state,id,clock=today()){
  const date=cycleFor(state,id);
@@ -55,15 +56,17 @@ function complete(state,id,draft,clock=today()){
  if(!draft||!Array.isArray(draft.steps)||!draft.steps.slice(0,3).every(Boolean)||draft.steps.length<3)throw Error('RP 매도, 주식 거래, $500 환전을 순서대로 완료해 주세요.');
  if(!Number.isInteger(draft.quantity)||!finite(draft.rp)||draft.rp<0||Math.abs(draft.rp*100-Math.round(draft.rp*100))>1e-7)throw Error('거래수량과 RP 금액(소수 둘째 자리)을 입력해 주세요.');
  if(prev.holdings+draft.quantity<0)throw Error('보유 수량보다 많이 매도할 수 없습니다.');
- const p=plan({v:nextV(prev.v,prev.pool,500),pool:prev.pool,holdings:prev.holdings,price:state.quote.price});
+ const p=orderPlan(state,id);
  if(Math.abs(draft.quantity)>Math.abs(p.quantity))throw Error('실제 수량이 계산 수량을 초과합니다. 기준 잔고를 확인해 주세요.');
  if(Math.sign(draft.quantity)!==Math.sign(p.quantity)&&draft.quantity!==0)throw Error('계산된 매수·매도 방향과 실제 거래 방향이 다릅니다.');
- const record={id:id+'-'+date,account:id,cycleDate:date,asOf:date,v:p.v,holdings:prev.holdings+draft.quantity,pool:draft.rp,price:state.quote.price,principal:prev.principal+500,quantity:draft.quantity,contribution:500,source:'web',rpMaturity:addDays(date,14),quoteDate:state.quote.date,createdAt:new Date().toISOString()};
+ // Excel F(next) uses the closing period's ending Pool, before the new row's deposit.
+ const vBasisPool=Math.max(0,draft.rp-500);
+ const record={id:id+'-'+date,account:id,cycleDate:date,asOf:date,v:nextV(prev.v,vBasisPool,500),orderV:p.v,vBasisPool,holdings:prev.holdings+draft.quantity,pool:draft.rp,price:state.quote.price,principal:prev.principal+500,quantity:draft.quantity,contribution:500,source:'web',rpMaturity:addDays(date,14),quoteDate:state.quote.date,createdAt:new Date().toISOString()};
  record.assets=record.holdings*record.price+record.pool;
  // RP is the observed ending balance. Execution price, fees and interest cannot be separated from two inputs.
  record.cashReconciliation=round(record.pool-(prev.pool+500-draft.quantity*record.price));
  return record;
 }
 function blank(){return {schemaVersion:1,updatedAt:new Date().toISOString(),accounts:{},records:[],drafts:{},settings:{contribution:500,band:.2,g:10,poolUsage:.75,rpDays:14},quote:null,baselineConfirmed:false};}
-root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
+root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,orderPlan,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
 })(typeof window!=='undefined'?window:globalThis);
