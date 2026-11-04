@@ -27,6 +27,7 @@ body{overflow-x:hidden}
 .title-row h2{margin:0;font-size:22px}.sub{margin-top:4px;font-size:13px;color:var(--muted)}.canvas-box{height:390px;position:relative}#historyChart{width:100%!important;height:100%!important}
 .info{border:1px solid var(--line);background:#fbfdff;border-radius:18px;padding:14px;margin-top:12px}.info-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.navbtn{border:0;background:#eef2f7;border-radius:12px;width:42px;height:42px;font-size:22px;font-weight:900;color:#374151}.navbtn:active{transform:scale(.96)}
 .info-body{text-align:center;flex:1}.info-date{color:var(--muted);font-size:13px;font-weight:900}.info-main{font-size:21px;font-weight:900;margin-top:6px}.info-sub{color:var(--muted);font-size:14px;font-weight:900;margin-top:3px}.info-extra{font-size:12px;color:#2563eb;font-weight:900;margin-top:5px}
+.history-period h3{margin:0;font-size:16px}.history-period-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.history-period-fields label{display:grid;gap:4px;min-width:0;font-size:13px;color:var(--muted)}.history-period-fields select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);padding:8px 4px;font:inherit;font-size:16px}.history-period-result{display:block;margin-top:10px;font-weight:800;font-variant-numeric:tabular-nums}
 .bottom-nav{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:6px;background:rgba(255,255,255,.94);border:1px solid rgba(229,231,235,.95);box-shadow:0 12px 30px rgba(15,23,42,.14);padding:6px;border-radius:18px;backdrop-filter:blur(12px);z-index:20}
 .nav-page{border:0;background:transparent;color:#6b7280;border-radius:13px;padding:9px 16px;font-size:13px;font-weight:900;min-width:92px}.nav-page.active{background:#111827;color:#fff}
 @supports(padding:max(0px)){.page{padding-bottom:max(78px,calc(66px + env(safe-area-inset-bottom)))}}
@@ -143,6 +144,15 @@ body{overflow-x:hidden}
 <div class="info-body" id="infoBody"><div class="info-date">그래프의 점 또는 버튼을 눌러보세요</div><div class="info-main">선택한 날짜의 순자산 표시</div><div class="info-sub">이전/다음 데이터 이동 가능</div></div>
 <button class="navbtn" onclick="movePoint(1)">&gt;</button>
 </div>
+</div>
+<div class="info history-period">
+<h3>기간 순자산 변화율</h3>
+<div class="sub">저장된 기록 기준</div>
+<div class="history-period-fields">
+<label>시작일<select id="historyPeriodStart" disabled></select></label>
+<label>종료일<select id="historyPeriodEnd" disabled></select></label>
+</div>
+<output class="history-period-result" id="historyPeriodResult" for="historyPeriodStart historyPeriodEnd" aria-live="polite">비교할 기록이 2개 이상 필요합니다.</output>
 </div>
 </div>
 
@@ -1397,6 +1407,10 @@ let trendKrw=[];
 let trendUsd=[];
 let currentMode='krwLinear';
 let selectedIndex=0;
+let historyHasRecords=false;
+const historyPeriodStart=document.getElementById('historyPeriodStart');
+const historyPeriodEnd=document.getElementById('historyPeriodEnd');
+const historyPeriodResult=document.getElementById('historyPeriodResult');
 
 function rebuildHistoryGeometry(rows,isPublic){
   historyDataIsPublic=Boolean(isPublic);
@@ -1410,6 +1424,7 @@ function rebuildHistoryGeometry(rows,isPublic){
       usd:usdValue
     };
   }).filter(row=>row.date&&Number.isFinite(row.krw)&&Number.isFinite(row.usd)&&row.krw>0&&row.usd>0);
+  historyHasRecords=rows!==DEMO_HISTORY&&source.length>0;
   const safeSource=source.length?source:DEMO_HISTORY.map(row=>({
     date:row.record_date,
     krw:row.index_krw,
@@ -1424,6 +1439,39 @@ function rebuildHistoryGeometry(rows,isPublic){
   const bandColors=['rgba(37,99,235,.09)','rgba(16,185,129,.10)','rgba(245,158,11,.12)','rgba(139,92,246,.11)'];
   yearBands=years.map((year,index)=>[year+'-01-01',(year+1)+'-01-01',bandColors[index%bandColors.length]]);
 }
+function renderHistoryPeriod(){
+  if(historyPeriodStart.disabled){
+    historyPeriodResult.textContent='비교할 기록이 2개 이상 필요합니다.';
+    return;
+  }
+  const first=hist.find(point=>point.date===historyPeriodStart.value);
+  const last=hist.find(point=>point.date===historyPeriodEnd.value);
+  if(!first||!last||first.date>=last.date){
+    historyPeriodResult.textContent='종료일을 시작일보다 뒤로 선택해 주세요.';
+    return;
+  }
+  const krw=signedPercent((last.krw/first.krw-1)*100);
+  const usd=signedPercent((last.usd/first.usd-1)*100);
+  historyPeriodResult.textContent='KRW '+krw+' · USD '+usd;
+}
+function syncHistoryPeriodDates(){
+  const dates=historyHasRecords?[...new Set(hist.map(point=>point.date))]:[];
+  const previousStart=historyPeriodStart.value;
+  const previousEnd=historyPeriodEnd.value;
+  for(const select of [historyPeriodStart,historyPeriodEnd]){
+    select.replaceChildren(...dates.map(date=>new Option(date,date)));
+    select.disabled=dates.length<2;
+  }
+  if(dates.length>=2){
+    const canKeepPeriod=dates.includes(previousStart)&&dates.includes(previousEnd);
+    historyPeriodStart.value=canKeepPeriod?previousStart:dates[dates.length-2];
+    historyPeriodEnd.value=canKeepPeriod?previousEnd:dates[dates.length-1];
+  }
+  renderHistoryPeriod();
+}
+historyPeriodStart.addEventListener('change',renderHistoryPeriod);
+historyPeriodEnd.addEventListener('change',renderHistoryPeriod);
+
 function expTrend(data,key){
   const points=data.filter(point=>Number(point[key])>0);
   if(points.length<2) return points.map(point=>({x:point.x,y:point[key]}));
@@ -1650,6 +1698,7 @@ const hc=new Chart(document.getElementById('historyChart'),{
 });
 function applyHistoryRows(rows,isPublic){
   rebuildHistoryGeometry(rows,isPublic);
+  syncHistoryPeriodDates();
   trendKrw=expTrend(hist,'krw');
   trendUsd=expTrend(hist,'usd');
   selectedIndex=Math.max(0,hist.length-1);
