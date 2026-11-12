@@ -41,6 +41,13 @@ function historyDates(record){
  if(record.quantity===null||record.source==='baseline')dates.tradeDate=null;
  return dates;
 }
+function accountTradeHistory(state,id){
+ const records=[...state.accounts[id].history,...state.records.filter(row=>row.account===id)];
+ const dated=records.map(row=>({...row,...historyDates(row)}));
+ // A completed app trade takes precedence over the imported row for its date.
+ const appByDate=new Map(dated.filter(row=>row.source==='web'&&row.tradeDate).map(row=>[row.tradeDate,row]));
+ return dated.filter(row=>(appByDate.get(row.tradeDate)??row)===row);
+}
 function orderPlan(state,id){const a=currentAccount(state,id);return plan({v:a.v,holdings:a.holdings,pool:a.pool,price:state.quote.price,contribution:state.settings.contribution});}
 function quoteValid(state,date){const q=state.quote;return !!q&&finite(q.price)&&q.price>0&&q.confirmed&&q.date===addDays(date,-1);}
 function canTrade(state,id,clock=today()){
@@ -79,5 +86,5 @@ function complete(state,id,draft,clock=today()){
  return record;
 }
 function blank(){return {schemaVersion:1,updatedAt:new Date().toISOString(),accounts:{},records:[],drafts:{},settings:{contribution:500,band:.2,g:10,poolUsage:.75,rpDays:14},quote:null,baselineConfirmed:false};}
-root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,tradePeriod,historyDates,orderPlan,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
+root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,tradePeriod,historyDates,accountTradeHistory,orderPlan,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
 })(typeof window!=='undefined'?window:globalThis);

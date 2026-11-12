@@ -20,6 +20,20 @@ test('Excel and app history use different date keys for the same trade',()=>{
 test('trade period can begin in the previous year',()=>{
  assert.deepEqual(V.tradePeriod('2027-01-05'),{cycleStart:'2026-12-22',cycleEnd:'2027-01-04',tradeDate:'2027-01-05'});
 });
+test('app trades supersede overlapping Excel rows per account, including archived app trades',()=>{
+ const s=fixture();
+ const imported={id:'excel',account:'minsu',cycleDate:'2026-10-20',source:'excel',quantity:0};
+ const older={...imported,id:'older',cycleDate:'2026-10-06'};
+ const app={id:'app',account:'minsu',cycleDate:'2026-11-03',source:'web',quantity:2};
+ s.accounts.minsu.history=[older,imported];
+ s.accounts.bobae.history=[{...imported,account:'bobae'}];
+ s.records=[app];
+ assert.deepEqual(V.accountTradeHistory(s,'minsu').map(r=>r.id),['older','app']);
+ assert.deepEqual(V.accountTradeHistory(s,'bobae').map(r=>r.id),['excel']);
+ s.accounts.minsu.history.push(s.records.pop());
+ assert.deepEqual(V.accountTradeHistory(s,'minsu').map(r=>r.id),['older','app']);
+ assert.equal(s.accounts.minsu.history.length,3);
+});
 test('old snapshot and wrong Monday cannot trade',()=>{const s=fixture();assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,true);assert.equal(V.canTrade(s,'minsu','2026-10-28').ok,false);s.quote.date='2026-10-25';assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,false);s.quote.date='2026-10-26';s.baselineConfirmed=false;assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,false);});
 test('two inputs complete a hold; RP is observed final balance',()=>{const s=fixture(),r=V.complete(s,'minsu',{steps:[true,true,true],quantity:0,rp:2512.34},'2026-10-27');assert.equal(r.holdings,100);assert.equal(r.pool,2512.34);assert.equal(r.principal,11500);assert.equal(r.cashReconciliation,12.34);assert.equal(r.rpMaturity,'2026-11-10');almost(r.v,10750);s.records.push(r);assert.equal(V.currentAccount(s,'minsu').pool,2512.34);assert.equal(V.currentAccount(s,'bobae').pool,2000);assert.equal(V.cycleFor(s,'minsu'),'2026-11-10');assert.equal(V.cycleFor(s,'bobae'),'2026-10-27');});
 test('incomplete steps, blank values and subcent RP rejected',()=>{const s=fixture();assert.throws(()=>V.complete(s,'minsu',{steps:[true,false,true],quantity:0,rp:2000},'2026-10-27'));assert.throws(()=>V.complete(s,'minsu',{steps:[true,true,true],quantity:null,rp:2000},'2026-10-27'));assert.throws(()=>V.complete(s,'minsu',{steps:[true,true,true],quantity:0,rp:2000.001},'2026-10-27'));});
