@@ -30,6 +30,17 @@ function excelRemaining({v,holdings,pool,price,contribution,amount,prevPool,firs
 }
 function currentAccount(state,id){const a=state.accounts[id];if(!a)throw Error('계좌를 찾을 수 없습니다.');const records=state.records.filter(r=>r.account===id).sort((a,b)=>a.cycleDate.localeCompare(b.cycleDate));return records.length?records[records.length-1]:a.baseline;}
 function cycleFor(state,id){return addDays(currentAccount(state,id).cycleDate,14);}
+function tradePeriod(tradeDate){
+ return {cycleStart:addDays(tradeDate,-14),cycleEnd:addDays(tradeDate,-1),tradeDate};
+}
+function historyDates(record){
+ // Excel history keys the closing period by its start. App trades and funded
+ // checkpoints instead key the next period by the day the trade takes place.
+ const keyedByTrade=record.source==='web'||record.source==='excel_checkpoint';
+ const dates=tradePeriod(keyedByTrade?record.cycleDate:addDays(record.cycleDate,14));
+ if(record.quantity===null||record.source==='baseline')dates.tradeDate=null;
+ return dates;
+}
 function orderPlan(state,id){const a=currentAccount(state,id);return plan({v:a.v,holdings:a.holdings,pool:a.pool,price:state.quote.price,contribution:state.settings.contribution});}
 function quoteValid(state,date){const q=state.quote;return !!q&&finite(q.price)&&q.price>0&&q.confirmed&&q.date===addDays(date,-1);}
 function canTrade(state,id,clock=today()){
@@ -68,5 +79,5 @@ function complete(state,id,draft,clock=today()){
  return record;
 }
 function blank(){return {schemaVersion:1,updatedAt:new Date().toISOString(),accounts:{},records:[],drafts:{},settings:{contribution:500,band:.2,g:10,poolUsage:.75,rpDays:14},quote:null,baselineConfirmed:false};}
-root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,orderPlan,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
+root.VR={round,floor,dateMs,addDays,today,nextV,plan,excelRemaining,currentAccount,cycleFor,tradePeriod,historyDates,orderPlan,quoteValid,canTrade,validateBaseline,validateState,complete,blank};
 })(typeof window!=='undefined'?window:globalThis);

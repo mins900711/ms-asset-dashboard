@@ -10,6 +10,16 @@ test('upper boundary is hold; above boundary sells below max',()=>{assert.equal(
 test('buy limited by Pool; never uses unfunded contribution',()=>{const p=V.plan({v:10000,holdings:0,pool:200,price:100});assert.equal(p.quantity,1);assert.equal(p.limited,true);});
 test('no negative or fractional holdings; zero pool permitted',()=>{assert.equal(V.plan({v:10000,holdings:1,pool:0,price:100}).quantity,0);assert.throws(()=>V.plan({v:10000,holdings:1.5,pool:0,price:100}));assert.throws(()=>V.nextV(0,1));});
 test('cycle handles leap years and dates strictly',()=>{assert.equal(V.addDays('2024-02-20',14),'2024-03-05');assert.throws(()=>V.dateMs('2026-02-30'));});
+test('Excel and app history use different date keys for the same trade',()=>{
+ const expected={cycleStart:'2026-10-06',cycleEnd:'2026-10-19',tradeDate:'2026-10-20'};
+ assert.deepEqual(V.historyDates({source:'excel',cycleDate:'2026-10-06',quantity:1}),expected);
+ assert.deepEqual(V.historyDates({source:'web',cycleDate:'2026-10-20',quantity:1}),expected);
+ assert.deepEqual(V.historyDates({source:'excel_checkpoint',cycleDate:'2026-10-20',asOf:'2026-10-25',quantity:1}),expected);
+ assert.deepEqual(V.historyDates({source:'excel',cycleDate:'2026-10-06',quantity:null}),{...expected,tradeDate:null});
+});
+test('trade period can begin in the previous year',()=>{
+ assert.deepEqual(V.tradePeriod('2027-01-05'),{cycleStart:'2026-12-22',cycleEnd:'2027-01-04',tradeDate:'2027-01-05'});
+});
 test('old snapshot and wrong Monday cannot trade',()=>{const s=fixture();assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,true);assert.equal(V.canTrade(s,'minsu','2026-10-28').ok,false);s.quote.date='2026-10-25';assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,false);s.quote.date='2026-10-26';s.baselineConfirmed=false;assert.equal(V.canTrade(s,'minsu','2026-10-27').ok,false);});
 test('two inputs complete a hold; RP is observed final balance',()=>{const s=fixture(),r=V.complete(s,'minsu',{steps:[true,true,true],quantity:0,rp:2512.34},'2026-10-27');assert.equal(r.holdings,100);assert.equal(r.pool,2512.34);assert.equal(r.principal,11500);assert.equal(r.cashReconciliation,12.34);assert.equal(r.rpMaturity,'2026-11-10');almost(r.v,10750);s.records.push(r);assert.equal(V.currentAccount(s,'minsu').pool,2512.34);assert.equal(V.currentAccount(s,'bobae').pool,2000);assert.equal(V.cycleFor(s,'minsu'),'2026-11-10');assert.equal(V.cycleFor(s,'bobae'),'2026-10-27');});
 test('incomplete steps, blank values and subcent RP rejected',()=>{const s=fixture();assert.throws(()=>V.complete(s,'minsu',{steps:[true,false,true],quantity:0,rp:2000},'2026-10-27'));assert.throws(()=>V.complete(s,'minsu',{steps:[true,true,true],quantity:null,rp:2000},'2026-10-27'));assert.throws(()=>V.complete(s,'minsu',{steps:[true,true,true],quantity:0,rp:2000.001},'2026-10-27'));});
