@@ -891,6 +891,9 @@ function renderMemberTabs(){
     memberTabs.appendChild(button);
   });
 }
+function settingsAssetVisible(owner,asset){
+  return !(['dad','mom'].includes(owner)&&canonicalAssetKey(asset[0])==='SGOV');
+}
 function renderSettings(){
   updateAssetBackupControls();
   const person=settingsData[settingsSelectedOwner];
@@ -912,9 +915,11 @@ function renderSettings(){
   settingsAccountsForDisplay(person).forEach(({account,sourceIndex:accountIndex})=>{
     const card=document.createElement('section');
     card.className='card account-card collapsed';
-    card.innerHTML='<button class="account-head" type="button" aria-expanded="false"><span class="account-head-left"><span class="account-name">'+escapeHtml(account.name)+'</span><span class="account-meta">'+escapeHtml(account.type)+' · '+account.assets.length+'개 자산</span></span><span class="account-head-right"><span class="account-total">'+actualWon(settingsAccountValue(account))+'</span><span class="chev">⌄</span></span></button><div class="asset-list"></div>';
+    const visibleAssetCount=account.assets.filter(asset=>settingsAssetVisible(settingsSelectedOwner,asset)).length;
+    card.innerHTML='<button class="account-head" type="button" aria-expanded="false"><span class="account-head-left"><span class="account-name">'+escapeHtml(account.name)+'</span><span class="account-meta">'+escapeHtml(account.type)+' · '+visibleAssetCount+'개 자산</span></span><span class="account-head-right"><span class="account-total">'+actualWon(settingsAccountValue(account))+'</span><span class="chev">⌄</span></span></button><div class="asset-list"></div>';
     const list=card.querySelector('.asset-list');
     account.assets.forEach((asset,assetIndex)=>{
+      if(!settingsAssetVisible(settingsSelectedOwner,asset)) return;
       const name=asset[0];
       const quantity=asset[1];
       const directInput=Boolean(settingsPrices[name]&&settingsPrices[name].directValue);
